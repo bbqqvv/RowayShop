@@ -8,7 +8,7 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-import { loginUser, registerUser, logoutUser } from "@/services/authService";
+import { loginUser, registerUser } from "@/services/authService";
 import { LoginResponse } from "@/hooks/auth/apiTypes"; // Đảm bảo LoginResponse được nhập đúng
 
 // Define the AuthContext type
@@ -110,10 +110,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   // Logout handler
   const logout = (): void => {
-    logoutUser();
-    setToken(null);
-    setUser(null);
-    document.cookie = "token=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    setToken(null); // Xóa token khỏi state
+    setUser(null); // Xóa user khỏi state
+    document.cookie = "token=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; // Xóa token khỏi cookie
     console.log("Logged out, token cleared");
   };
 

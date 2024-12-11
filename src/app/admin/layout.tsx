@@ -4,12 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, ReactNode } from "react";
 import { CircularProgress } from "@nextui-org/react";
 import useAuth from "@/hooks/auth/useAuth";
-import Sidebar from "./components/Sidebar";
+import AdminLayout from "./components/AdminLayout";
 
 interface LayoutProps {
   children: ReactNode;
 }
-
 const AdminChecking: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { token, loading } = useAuth();
   const router = useRouter();
@@ -37,11 +36,10 @@ const AdminChecking: React.FC<{ children: ReactNode }> = ({ children }) => {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <main className="flex">
-      <Sidebar />
-      <div className="flex-grow">
+    <main>
+      <AdminLayout>
         <AdminChecking>{children}</AdminChecking>
-      </div>
+      </AdminLayout>
     </main>
   );
 };

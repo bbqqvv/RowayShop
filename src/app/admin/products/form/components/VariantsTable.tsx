@@ -1,28 +1,55 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 
-// Define allowed categories
-type Category =
-  | "clothing"
-  | "electronics"
-  | "accessories"
-  | "shoes"
-  | "bags"
-  | "hats";
-
-interface Variant {
+// Define the Variant type here if not already defined
+type Variant = {
   color: string;
   size: string[];
   stock: number;
   price: number;
-}
+};
 
 interface VariantsTableProps {
   variants: Variant[];
   handleVariantChange: (index: number, key: keyof Variant, value: any) => void;
   addVariant: () => void;
   removeVariant: (index: number) => void;
-  category: string;
+  category: string; // Ensure category is passed as a prop
 }
+
+// Define allowed categories
+type Category =
+  | "Shirt"
+  | "T-shirt"
+  | "Polo shirt"
+  | "Pants"
+  | "Shoes"
+  | "Jacket";
+
+// Chuyển đổi slug thành category chuẩn
+const normalizeCategory = (category: string): Category => {
+  switch (category.toLowerCase()) {
+    case "so-mi":
+    case "shirt":
+      return "Shirt";
+    case "ao-thun":
+    case "t-shirt":
+      return "T-shirt";
+    case "ao-polo":
+    case "polo-shirt":
+      return "Polo shirt";
+    case "quan":
+    case "pants":
+      return "Pants";
+    case "giay-dep":
+    case "shoes":
+      return "Shoes";
+    case "ao-khoac":
+    case "jacket":
+      return "Jacket";
+    default:
+      return "Shirt"; // Default category if no match
+  }
+};
 
 const VariantsTable: React.FC<VariantsTableProps> = ({
   variants,
@@ -31,16 +58,42 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
   removeVariant,
   category,
 }) => {
-  // Define size options for each category
-  const sizeOptions: Record<Category, string[]> = {
-    clothing: ["S", "M", "L", "XL", "XXL"],
-    electronics: [], // No size for electronics
-    accessories: ["One Size"],
-    shoes: ["36", "37", "38", "39", "40", "41"],
-    bags: ["Small", "Medium", "Large"],
-    hats: ["One Size", "M", "L"],
+  // Chuyển đổi category thành giá trị chuẩn
+  const normalizedCategory = useMemo(
+    () => normalizeCategory(category),
+    [category]
+  );
+
+  // Define size options for each category using useMemo
+  const sizeOptions = useMemo(() => {
+    switch (normalizedCategory) {
+      case "Shirt":
+        return ["S", "M", "L", "XL", "XXL"];
+      case "T-shirt":
+        return ["S", "M", "L", "XL"];
+      case "Polo shirt":
+        return ["S", "M", "L", "XL"];
+      case "Pants":
+        return ["28", "30", "32", "34", "36"];
+      case "Shoes":
+        return ["36", "37", "38", "39", "40", "41"];
+      case "Jacket":
+        return ["S", "M", "L", "XL"];
+      default:
+        return []; // Return empty array if no match found
+    }
+  }, [normalizedCategory]); // Recompute sizeOptions when normalizedCategory changes
+
+  // Handle size change for variants
+  const handleSizeChange = (index: number, size: string, checked: boolean) => {
+    const updatedSizes = checked
+      ? [...(variants[index].size || []), size]
+      : variants[index].size?.filter((s) => s !== size) || [];
+
+    handleVariantChange(index, "size", updatedSizes); // Update sizes in the variant
   };
 
+  // Handle remove variant with confirmation for the last variant
   const handleRemoveClick = useCallback(
     (index: number) => {
       if (
@@ -53,14 +106,6 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
     },
     [variants, removeVariant]
   );
-
-  const handleSizeChange = (index: number, size: string, checked: boolean) => {
-    const updatedSizes = checked
-      ? [...(variants[index].size || []), size]
-      : variants[index].size?.filter((s) => s !== size) || [];
-
-    handleVariantChange(index, "size", updatedSizes);
-  };
 
   return (
     <section className="flex-1 flex flex-col gap-4 bg-white rounded-xl p-6 border shadow-md">
@@ -114,7 +159,7 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
                   </td>
                   <td className="px-6 py-3">
                     <div className="flex gap-3 flex-wrap">
-                      {(sizeOptions[category as Category] || []).map((size) => (
+                      {sizeOptions.map((size) => (
                         <label
                           key={size}
                           className="flex items-center space-x-2 text-sm"

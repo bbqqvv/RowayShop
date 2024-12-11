@@ -1,16 +1,19 @@
 "use client";
 
+import { useCategories } from "@/hooks/categories/useCategories";
+
 interface BasicDetailsProps {
   data: Record<string, any> | null;
   handleData: (key: string, value: any) => void;
-  handleCategoryChange: (value: string) => void; // Thêm prop mới cho handle category change
+  handleCategoryChange: (value: string) => void; // Prop cho handleCategoryChange
 }
-
 export default function BasicDetails({
   data,
   handleData,
   handleCategoryChange,
 }: BasicDetailsProps) {
+  const { categories, loading, error } = useCategories(); // Sử dụng hook để lấy danh sách category từ API
+  console.log("Danh sách category:", categories);
   return (
     <section className="flex-1 flex flex-col gap-3 bg-white rounded-xl p-4 border">
       <h1 className="font-semibold">Basic Details</h1>
@@ -32,7 +35,6 @@ export default function BasicDetails({
           required
         />
       </div>
-
       <div className="flex flex-col gap-1">
         <label
           className="text-gray-500 text-xs"
@@ -70,14 +72,16 @@ export default function BasicDetails({
           required
         >
           <option value="">Select Category</option>
-          <option value="clothing">Clothing</option>
-          <option value="accessories">Accessories</option>
-          <option value="shoes">Shoes</option>
-          <option value="bags">Bags</option>
-          <option value="hats">Hats</option>
+          {loading && <option value="">Loading categories...</option>}
+          {error && <option value="">{error}</option>}
+          {categories.length > 0 &&
+            categories.map((category) => (
+              <option key={category.id} value={category.slug}>
+                {category.name}
+              </option>
+            ))}
         </select>
       </div>
-
       <div className="flex flex-col gap-1">
         <label className="text-gray-500 text-xs" htmlFor="product-stock">
           Stock <span className="text-red-500">*</span>{" "}
@@ -130,6 +134,19 @@ export default function BasicDetails({
           className="border px-4 py-2 rounded-lg w-full outline-none"
           required
         />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="text-gray-500 text-xs" htmlFor="product-sale-price">
+          Featured <span className="text-red-500">*</span>
+        </label>
+        <select
+          id="featured"
+          name="featured"
+          className="border px-4 py-2 rounded-lg outline-none"
+        >
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
       </div>
     </section>
   );

@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: LayoutProps) {
       )}
 
       {/* Main Content */}
-      <section className="flex-1 flex flex-col">
+      <section className="flex-1 flex flex-col min-h-screen overflow-hidden">
         <Header toggleSidebar={toggleSidebar} />
         <section className="flex-1 bg-[#eff3f4] p-4">{children}</section>
       </section>

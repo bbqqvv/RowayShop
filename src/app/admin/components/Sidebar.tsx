@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthContext } from "@/contexts/AuthContext";
 import {
   Cat,
   Layers2,
@@ -15,6 +16,7 @@ import {
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import router from "next/router";
 import toast from "react-hot-toast"; // Thêm toast để hiển thị thông báo
 
 // Khai báo kiểu dữ liệu cho menu item
@@ -29,6 +31,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ closeSidebar }: SidebarProps) {
+  const { logout } = useAuthContext(); // Lấy hàm logout từ context
+
   const menuList: MenuItem[] = [
     {
       name: "Dashboard",
@@ -44,11 +48,6 @@ export default function Sidebar({ closeSidebar }: SidebarProps) {
       name: "Categories",
       link: "/admin/categories",
       icon: <Layers2 className="h-5 w-5" />,
-    },
-    {
-      name: "Brands",
-      link: "/admin/brands",
-      icon: <Cat className="h-5 w-5" />,
     },
     {
       name: "Orders",
@@ -98,12 +97,11 @@ export default function Sidebar({ closeSidebar }: SidebarProps) {
         className="flex items-center gap-3 px-4 py-2 rounded-lg text-red-500 hover:bg-red-100 font-medium transition-all duration-300"
         onClick={async () => {
           try {
-            // Chạy signOut và hiển thị thông báo khi hoàn thành
-            await toast.promise(signOut(), {
-              loading: "Logging out...",
-              success: "Successfully logged out!",
-              error: "Error logging out. Please try again.",
-            });
+            // Gọi hàm logout từ context để thực hiện logout
+            logout();
+            // Có thể chuyển hướng người dùng về trang login hoặc trang chủ sau khi logout
+            router.push("/login"); // Hoặc có thể dùng router.push("/login") nếu dùng next.js router
+            toast.success("Successfully logged out!");
           } catch (error) {
             toast.error("Error logging out. Please try again.");
           }
