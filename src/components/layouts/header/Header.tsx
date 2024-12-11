@@ -1,13 +1,24 @@
 import HeaderLogo from "./HeaderLogo";
-import HeaderMenu from "./HeaderMenu";
 import HeaderLogin from "./HeaderLogin";
+import HeaderFavourite from "./HeaderFavourite";
+import HeaderCart from "./HeaderCart";
+import HeaderSearch from "./HeadeSearch";
 
 export default function Header() {
   return (
-    <nav className="py-3 px-4 md:px-14 border-b flex items-center justify-between bg-white dark:bg-gray-800">
-      <HeaderLogo />
-      <HeaderMenu />
-      <HeaderLogin />
+    <nav className="py-3 px-4 md:px-14 border-b flex justify-between items-center bg-white dark:bg-gray-800">
+      {/* Left section: Logo and Menu */}
+      <div className="flex items-center space-x-6">
+        <HeaderLogo />
+        <HeaderSearch />
+      </div>
+
+      {/* Right section: Cart, Favourite, and Login */}
+      <div className="flex items-center space-x-6">
+        <HeaderCart />
+        <HeaderFavourite />
+        <HeaderLogin />
+      </div>
     </nav>
   );
 }
