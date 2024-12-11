@@ -40,8 +40,8 @@ export const registerUser = async (
   }
 };
 
-// Logout function
-export const logoutUser = () => {
-  document.cookie = "token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
-  console.log("Logged out, token cleared");
-};
+// // Logout function
+// export const logoutUser = () => {
+//   document.cookie = "token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+//   console.log("Logged out, token cleared");
+// };
