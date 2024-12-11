@@ -1,75 +1,102 @@
 "use client";
 
-import { Button } from "@nextui-org/react";
-import { useState, ChangeEvent, useEffect } from "react";
-import { AiOutlineUpload } from "react-icons/ai"; // Import icon từ react-icons
-import ImageModal from "@/components/shared/ImageModal";
+import { useState, useEffect, ChangeEvent } from "react";
+import { Button, Spinner } from "@nextui-org/react";
+import { AiOutlineUpload } from "react-icons/ai";
+import { useCategories } from "@/hooks/categories/useCategories";
+import ImageModal from "@/components/features/ImageModal";
+import { Category } from "../../types/Category";
 
-// Định nghĩa kiểu dữ liệu cho state
 interface FormData {
   name: string;
   slug: string;
 }
 
-export default function Form() {
-  // Khởi tạo state cho dữ liệu và hình ảnh
+interface FormProps {
+  selectedCategory: Category | null; // Nhận thông tin category cần chỉnh sửa
+}
+
+export default function Form({ selectedCategory }: FormProps) {
   const [data, setData] = useState<FormData>({ name: "", slug: "" });
   const [image, setImage] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null); // State để lưu URL của Blob hình ảnh
-  const [isModalOpen, setIsModalOpen] = useState(false); // State để kiểm tra modal có mở hay không
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Hàm xử lý dữ liệu khi người dùng nhập vào form
-  const handleData = (key: keyof FormData, value: string) => {
+  const { createNewCategory, updateExistingCategory, loading, error } =
+    useCategories();
+
+  useEffect(() => {
+    if (selectedCategory) {
+      setData({ name: selectedCategory.name, slug: selectedCategory.slug });
+      setImageUrl(selectedCategory.image || null); // Hiển thị ảnh hiện tại nếu có
+    }
+  }, [selectedCategory]);
+
+  const handleDataChange = (key: keyof FormData, value: string) => {
     setData((prevData) => ({
       ...prevData,
       [key]: value,
     }));
   };
 
-  // Hàm xử lý thay đổi tệp hình ảnh
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
       setImage(file);
+      setImageUrl(URL.createObjectURL(file));
+      setMessage(null); // Clear error message if any
     }
   };
 
-  // Hàm để tạo URL Blob từ file hình ảnh
-  useEffect(() => {
-    if (image) {
-      const objectUrl = URL.createObjectURL(image);
-      setImageUrl(objectUrl);
-
-      // Clean up URL khi hình ảnh bị thay đổi hoặc component bị unmount
-      return () => URL.revokeObjectURL(objectUrl);
+  const handleCreateOrUpdate = async () => {
+    if (!data.name && !data.slug && !image) {
+      setMessage("Please update at least one field.");
+      return;
     }
-  }, [image]);
 
-  const handleCreate = async () => {};
+    const formData = new FormData();
+    if (data.name) formData.append("name", data.name); // Chỉ thêm khi có giá trị
+    if (data.slug) formData.append("slug", data.slug); // Chỉ thêm khi có giá trị
+    if (image) formData.append("image", image); // Chỉ thêm khi có giá trị
 
-  // Hàm mở modal khi click vào hình ảnh
-  const openModal = () => {
-    setIsModalOpen(true);
+    try {
+      if (selectedCategory) {
+        // Nếu đang ở chế độ cập nhật
+        await updateExistingCategory(selectedCategory.id, formData); // Gửi các trường đã thay đổi
+        setMessage("Category updated successfully!");
+      } else {
+        // Nếu đang ở chế độ tạo mới
+        await createNewCategory(formData);
+        setMessage("Category created successfully!");
+      }
+
+      // Reset lại form sau khi hoàn tất
+      setData({ name: "", slug: "" });
+      setImage(null);
+      setImageUrl(null);
+    } catch {
+      setMessage(
+        error || "An error occurred while creating/updating the category."
+      );
+    }
   };
 
-  // Hàm đóng modal
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="flex flex-col gap-4 bg-white rounded-xl p-6 w-full md:w-[400px] shadow-lg">
       <h1 className="font-semibold text-lg text-gray-800 mb-4">
-        Create Category
+        {selectedCategory ? "Update Category" : "Create Category"}
       </h1>
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          handleCreate();
+          handleCreateOrUpdate();
         }}
       >
-        {/* Input for Image */}
         <div className="flex flex-col gap-2">
           <label
             htmlFor="category-image"
@@ -77,39 +104,33 @@ export default function Form() {
           >
             Image <span className="text-red-500">*</span>
           </label>
-
-          {/* Nút chọn ảnh */}
           <div
-            className="border px-4 py-2 rounded-lg w-full text-center cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors duration-200 flex justify-center items-center"
+            className="border px-4 py-2 rounded-lg w-full text-center cursor-pointer bg-gray-100 hover:bg-gray-200 flex justify-center items-center"
             onClick={() => document.getElementById("category-image")?.click()}
           >
             <AiOutlineUpload className="mr-2 text-xl text-blue-500" />
-            <span className="text-gray-600">Click to select an image</span>
+            <span className="text-gray-600">
+              {image ? "Change Image" : "Click to select an image"}
+            </span>
           </div>
-
-          {/* Thực tế là input file ẩn đi */}
           <input
             id="category-image"
-            name="category-image"
             type="file"
             onChange={handleImageChange}
-            className="hidden" // Ẩn input file
+            className="hidden"
           />
-
-          {/* Hiển thị ảnh thumbnail */}
           {imageUrl && (
             <div className="mt-3 flex justify-center">
               <img
                 src={imageUrl}
                 alt="Selected"
                 className="w-24 h-24 object-cover rounded-lg shadow-md cursor-pointer"
-                onClick={openModal} // Mở modal khi click vào ảnh
+                onClick={openModal}
               />
             </div>
           )}
         </div>
 
-        {/* Input for Name */}
         <div className="flex flex-col gap-2">
           <label
             htmlFor="category-name"
@@ -119,16 +140,14 @@ export default function Form() {
           </label>
           <input
             id="category-name"
-            name="category-name"
             type="text"
-            placeholder="Enter Name"
+            placeholder="Enter the category name (e.g., Clothes)"
             value={data.name}
-            onChange={(e) => handleData("name", e.target.value)}
-            className="border px-4 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => handleDataChange("name", e.target.value)}
+            className="border px-4 py-2 rounded-lg w-full"
           />
         </div>
 
-        {/* Input for Slug */}
         <div className="flex flex-col gap-2">
           <label
             htmlFor="category-slug"
@@ -138,27 +157,42 @@ export default function Form() {
           </label>
           <input
             id="category-slug"
-            name="category-slug"
             type="text"
+            placeholder="Enter the category slug (e.g., clothes)"
             value={data.slug}
-            onChange={(e) => handleData("slug", e.target.value)}
-            placeholder="Enter Slug"
-            className="border px-4 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => handleDataChange("slug", e.target.value)}
+            className="border px-4 py-2 rounded-lg w-full"
           />
         </div>
 
-        {/* Submit Button */}
-        <Button color="primary" type="submit" className="mt-4 w-full">
-          Create
+        <Button
+          color="primary"
+          type="submit"
+          className="mt-4 w-full flex items-center justify-center"
+          disabled={loading}
+        >
+          {loading ? <Spinner size="sm" className="mr-2" /> : null}
+          {loading ? "Saving..." : selectedCategory ? "Update" : "Create"}
         </Button>
       </form>
 
-      {/* Modal for viewing larger image */}
-      <ImageModal
-        imageUrl={imageUrl}
-        isOpen={isModalOpen}
-        onClose={closeModal} // Sử dụng hàm đóng modal
-      />
+      {message && (
+        <div
+          className={`mt-4 text-sm font-medium ${
+            error ? "text-red-500" : "text-green-500"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+
+      {isModalOpen && imageUrl && (
+        <ImageModal
+          imageUrl={imageUrl}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 }
