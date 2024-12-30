@@ -5,36 +5,38 @@ import { useCategories } from "@/hooks/categories/useCategories";
 interface BasicDetailsProps {
   data: Record<string, any> | null;
   handleData: (key: string, value: any) => void;
-  handleCategoryChange: (value: string) => void; // Prop cho handleCategoryChange
+  handleCategoryChange: (value: string) => void;
 }
+
 export default function BasicDetails({
   data,
   handleData,
   handleCategoryChange,
 }: BasicDetailsProps) {
-  const { categories, loading, error } = useCategories(); // Sử dụng hook để lấy danh sách category từ API
-  console.log("Danh sách category:", categories);
+  const { categories, loading, error } = useCategories();
+
   return (
     <section className="flex-1 flex flex-col gap-3 bg-white rounded-xl p-4 border">
       <h1 className="font-semibold">Basic Details</h1>
-
+      {/* Product Name */}
       <div className="flex flex-col gap-1">
-        <label className="text-gray-500 text-xs" htmlFor="product-title">
+        <label className="text-gray-500 text-xs" htmlFor="product-name">
           Product Name <span className="text-red-500">*</span>{" "}
         </label>
         <input
           type="text"
-          placeholder="Enter Title"
-          id="product-title"
-          name="product-title"
-          value={data?.title ?? ""}
+          placeholder="Enter name"
+          id="product-name"
+          name="product-name"
+          value={data?.name ?? ""}
           onChange={(e) => {
-            handleData("title", e.target.value);
+            handleData("name", e.target.value);
           }}
           className="border px-4 py-2 rounded-lg w-full outline-none"
           required
         />
       </div>
+      {/* Short Description */}
       <div className="flex flex-col gap-1">
         <label
           className="text-gray-500 text-xs"
@@ -47,15 +49,33 @@ export default function BasicDetails({
           placeholder="Enter Short Description"
           id="product-short-description"
           name="product-short-description"
-          value={data?.shortDesciption ?? ""}
+          value={data?.shortDescription ?? ""}
           onChange={(e) => {
-            handleData("shortDesciption", e.target.value);
+            handleData("shortDescription", e.target.value);
           }}
           className="border px-4 py-2 rounded-lg w-full outline-none"
           required
         />
       </div>
-
+      {/* Product Code */}
+      <div className="flex flex-col gap-1">
+        <label className="text-gray-500 text-xs" htmlFor="product-code">
+          Product Code <span className="text-red-500">*</span>{" "}
+        </label>
+        <input
+          type="text"
+          placeholder="Enter Product Code"
+          id="product-code"
+          name="product-code"
+          value={data?.productCode ?? ""}
+          onChange={(e) => {
+            handleData("productCode", e.target.value);
+          }}
+          className="border px-4 py-2 rounded-lg w-full outline-none"
+          required
+        />
+      </div>
+      {/* Category */}
       <div className="flex flex-col gap-1">
         <label className="text-gray-500 text-xs" htmlFor="product-category">
           Product Category <span className="text-red-500">*</span>
@@ -65,8 +85,9 @@ export default function BasicDetails({
           name="product-category"
           value={data?.categoryId ?? ""}
           onChange={(e) => {
-            handleData("categoryId", e.target.value); // Cập nhật dữ liệu categoryId
-            handleCategoryChange(e.target.value); // Truyền giá trị category xuống component cha
+            // Gửi ID category thay vì slug
+            handleData("categoryId", e.target.value);
+            handleCategoryChange(e.target.value); // Lưu slug cho các xử lý khác nếu cần
           }}
           className="border px-4 py-2 rounded-lg w-full outline-none"
           required
@@ -76,12 +97,13 @@ export default function BasicDetails({
           {error && <option value="">{error}</option>}
           {categories.length > 0 &&
             categories.map((category) => (
-              <option key={category.id} value={category.slug}>
+              <option key={category.id} value={category.id}>
                 {category.name}
               </option>
             ))}
         </select>
       </div>
+      {/* Stock */}
       <div className="flex flex-col gap-1">
         <label className="text-gray-500 text-xs" htmlFor="product-stock">
           Stock <span className="text-red-500">*</span>{" "}
@@ -99,7 +121,7 @@ export default function BasicDetails({
           required
         />
       </div>
-
+      {/* Price */}
       <div className="flex flex-col gap-1">
         <label className="text-gray-500 text-xs" htmlFor="product-price">
           Price <span className="text-red-500">*</span>{" "}
@@ -118,31 +140,57 @@ export default function BasicDetails({
         />
       </div>
 
+      {/* Sale Price */}
       <div className="flex flex-col gap-1">
-        <label className="text-gray-500 text-xs" htmlFor="product-sale-price">
-          Sale Price <span className="text-red-500">*</span>{" "}
+        <label className="text-gray-500 text-xs" htmlFor="product-sale-percentage">
+          Sale Percentage <span className="text-red-500">*</span>{" "}
         </label>
         <input
           type="number"
-          placeholder="Enter Sale Price"
-          id="product-sale-price"
-          name="product-sale-price"
-          value={data?.salePrice ?? ""}
+          placeholder="Enter Sale Percentage"
+          id="product-sale-percentage"
+          name="product-sale-percentage"
+          value={data?.salePercentage ?? ""}
           onChange={(e) => {
-            handleData("salePrice", e.target.valueAsNumber);
+            handleData("salePercentage", e.target.valueAsNumber);
           }}
           className="border px-4 py-2 rounded-lg w-full outline-none"
           required
         />
       </div>
+      {/* Featured */}
       <div className="flex flex-col gap-1">
-        <label className="text-gray-500 text-xs" htmlFor="product-sale-price">
+        <label className="text-gray-500 text-xs" htmlFor="product-featured">
           Featured <span className="text-red-500">*</span>
         </label>
         <select
-          id="featured"
-          name="featured"
-          className="border px-4 py-2 rounded-lg outline-none"
+          id="product-featured"
+          name="product-featured"
+          value={data?.featured ?? "no"}
+          onChange={(e) => {
+            handleData("featured", e.target.value);
+          }}
+          className="border px-4 py-2 rounded-lg w-full outline-none"
+          required
+        >
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+      {/* Sale */}
+      <div className="flex flex-col gap-1">
+        <label className="text-gray-500 text-xs" htmlFor="product-sale">
+          Sale <span className="text-red-500">*</span>
+        </label>
+        <select
+          id="product-sale"
+          name="product-sale"
+          value={data?.sale ?? "no"}
+          onChange={(e) => {
+            handleData("sale", e.target.value);
+          }}
+          className="border px-4 py-2 rounded-lg w-full outline-none"
+          required
         >
           <option value="no">No</option>
           <option value="yes">Yes</option>

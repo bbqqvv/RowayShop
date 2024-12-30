@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css"; // Đảm bảo bạn nhập đúng CSS cho phiên bản mới
 
-// Nhập động phiên bản fork của ReactQuill
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 const modules = {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ListView from "./components/ListView";
+import { ToastContainer } from "react-toastify";
 
 export default function Page() {
   return (
@@ -19,6 +20,8 @@ export default function Page() {
       <section>
         <ListView />
       </section>
+      <ToastContainer />
+
     </main>
   );
 }

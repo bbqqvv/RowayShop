@@ -1,4 +1,5 @@
 "use client";
+
 import React, {
   createContext,
   useContext,
@@ -8,12 +9,12 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
+import { setCookie, getCookie, deleteCookie } from "cookies-next";
 import { loginUser, registerUser } from "@/services/authService";
-import { LoginResponse } from "@/hooks/auth/apiTypes"; // Đảm bảo LoginResponse được nhập đúng
+import { LoginResponse } from "@/hooks/auth/apiTypes";
 
-// Define the AuthContext type
 interface AuthContextType {
-  user: LoginResponse["user"] | null; // Sử dụng LoginResponse['user']
+  user: LoginResponse["user"] | null;
   token: string | null;
   setUser: Dispatch<SetStateAction<LoginResponse["user"] | null>>;
   setToken: Dispatch<SetStateAction<string | null>>;
@@ -27,18 +28,10 @@ interface AuthContextType {
   loading: boolean;
 }
 
-// Utility to get a cookie by name
-const getCookie = (name: string): string | null => {
-  const matches = document.cookie.match(
-    new RegExp("(^| )" + name + "=([^;]+)")
-  );
-  return matches ? matches[2] : null;
-};
-
 // Create AuthContext
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Custom Hook to use AuthContext
+// Custom Hook
 export const useAuthContext = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -51,19 +44,31 @@ export const useAuthContext = (): AuthContextType => {
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<LoginResponse["user"] | null>(null); // Lấy kiểu user từ LoginResponse
+  const [user, setUser] = useState<LoginResponse["user"] | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Restore token from cookie on page load
+  // Restore token and user from cookies
   useEffect(() => {
-    const storedToken = getCookie("token");
+    const storedToken = getCookie("token") as string | undefined;
     if (storedToken) {
+      // Validate the token if needed here
       setToken(storedToken);
-      console.log("Token loaded from cookie:", storedToken); // Log token when it's restored from cookie
     }
     setLoading(false);
   }, []);
+
+  // Helper function to set token and user state
+  const setAuthData = (data: LoginResponse) => {
+    setToken(data.token);
+    setUser(data.user);
+    setCookie("token", data.token, {
+      maxAge: 3600,
+      path: "/",
+      sameSite: "strict",
+    });
+  };
 
   // Login handler
   const login = async (
@@ -71,18 +76,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     password: string
   ): Promise<LoginResponse> => {
     try {
+      setError(null);
       const data = await loginUser(username, password);
-      if (data?.token) {
-        setToken(data.token);
-        setUser(data.user); // Lưu thông tin user vào state
-        document.cookie = `token=${data.token}; path=/; max-age=3600; SameSite=Strict`;
-        console.log("Login successful, token:", data.token);
-        return data;
-      }
-      throw new Error("Token not found in response");
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+      if (!data?.token) throw new Error("Token not found in response");
+      setAuthData(data);
+      return data;
+    } catch (err) {
+      setError("Login failed. Please try again.");
+      throw err;
     }
   };
 
@@ -93,27 +94,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     email: string
   ): Promise<LoginResponse> => {
     try {
+      setError(null);
       const data = await registerUser(username, password, email);
-      if (data?.token) {
-        setToken(data.token);
-        setUser(data.user); // Lưu thông tin user vào state
-        document.cookie = `token=${data.token}; path=/; max-age=3600; Secure; SameSite=Strict`;
-        console.log("Registration successful, token:", data.token);
-        return data;
-      }
-      throw new Error("Token not found in response");
-    } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
+      if (!data?.token) throw new Error("Token not found in response");
+      setAuthData(data);
+      return data;
+    } catch (err) {
+      setError("Registration failed. Please try again.");
+      throw err;
     }
   };
 
   // Logout handler
   const logout = (): void => {
-    setToken(null); // Xóa token khỏi state
-    setUser(null); // Xóa user khỏi state
-    document.cookie = "token=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; // Xóa token khỏi cookie
-    console.log("Logged out, token cleared");
+    setToken(null);
+    setUser(null);
+    deleteCookie("token", { path: "/" });
   };
 
   return (
@@ -129,7 +125,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         loading,
       }}
     >
-      {children}
+      {loading ? <p>Loading...</p> : children}
     </AuthContext.Provider>
   );
 };

@@ -3,14 +3,9 @@ import axios from "axios";
 const apiClient = axios.create({
   baseURL: "http://localhost:8080/api/categories", // Base URL
 });
-
 // Lấy danh sách tất cả các danh mục
-export const getAllCategories = async (token: string) => {
-  const response = await apiClient.get("", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const getAllCategories = async () => {
+  const response = await apiClient.get(""); // Không cần token cho yêu cầu GET này
   return response.data;
 };
 

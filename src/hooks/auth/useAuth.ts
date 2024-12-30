@@ -1,3 +1,4 @@
+"use client"
 import { useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { LoginResponse } from "@/hooks/auth/apiTypes";

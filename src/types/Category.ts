@@ -1,4 +1,5 @@
 export interface Category {
+  sizes: never[];
   id: number;
   name: string;
   slug: string;

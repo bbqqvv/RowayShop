@@ -39,7 +39,7 @@ export default function LoginPage() {
       );
       // Kiểm tra nếu có token trong phản hồi
       if (response?.token) {
-        router.push("/admin"); // Sau khi đăng nhập thành công, chuyển hướng tới trang Dashboard
+        router.push("/"); // Sau khi đăng nhập thành công, chuyển hướng tới trang Dashboard
       } else {
         setLocalError("Invalid username or password."); // Hiển thị lỗi nếu không có token
       }

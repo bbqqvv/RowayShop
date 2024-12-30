@@ -1,6 +1,5 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback} from "react";
 
-// Define the Variant type here if not already defined
 type Variant = {
   color: string;
   size: string[];
@@ -13,43 +12,8 @@ interface VariantsTableProps {
   handleVariantChange: (index: number, key: keyof Variant, value: any) => void;
   addVariant: () => void;
   removeVariant: (index: number) => void;
-  category: string; // Ensure category is passed as a prop
+  category: string;
 }
-
-// Define allowed categories
-type Category =
-  | "Shirt"
-  | "T-shirt"
-  | "Polo shirt"
-  | "Pants"
-  | "Shoes"
-  | "Jacket";
-
-// Chuyển đổi slug thành category chuẩn
-const normalizeCategory = (category: string): Category => {
-  switch (category.toLowerCase()) {
-    case "so-mi":
-    case "shirt":
-      return "Shirt";
-    case "ao-thun":
-    case "t-shirt":
-      return "T-shirt";
-    case "ao-polo":
-    case "polo-shirt":
-      return "Polo shirt";
-    case "quan":
-    case "pants":
-      return "Pants";
-    case "giay-dep":
-    case "shoes":
-      return "Shoes";
-    case "ao-khoac":
-    case "jacket":
-      return "Jacket";
-    default:
-      return "Shirt"; // Default category if no match
-  }
-};
 
 const VariantsTable: React.FC<VariantsTableProps> = ({
   variants,
@@ -58,32 +22,6 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
   removeVariant,
   category,
 }) => {
-  // Chuyển đổi category thành giá trị chuẩn
-  const normalizedCategory = useMemo(
-    () => normalizeCategory(category),
-    [category]
-  );
-
-  // Define size options for each category using useMemo
-  const sizeOptions = useMemo(() => {
-    switch (normalizedCategory) {
-      case "Shirt":
-        return ["S", "M", "L", "XL", "XXL"];
-      case "T-shirt":
-        return ["S", "M", "L", "XL"];
-      case "Polo shirt":
-        return ["S", "M", "L", "XL"];
-      case "Pants":
-        return ["28", "30", "32", "34", "36"];
-      case "Shoes":
-        return ["36", "37", "38", "39", "40", "41"];
-      case "Jacket":
-        return ["S", "M", "L", "XL"];
-      default:
-        return []; // Return empty array if no match found
-    }
-  }, [normalizedCategory]); // Recompute sizeOptions when normalizedCategory changes
-
   // Handle size change for variants
   const handleSizeChange = (index: number, size: string, checked: boolean) => {
     const updatedSizes = checked
@@ -91,6 +29,10 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
       : variants[index].size?.filter((s) => s !== size) || [];
 
     handleVariantChange(index, "size", updatedSizes); // Update sizes in the variant
+  };
+  // Handle price change for variants
+  const handlePriceChange = (index: number, value: number) => {
+    handleVariantChange(index, "price", value); // Update price in the variant
   };
 
   // Handle remove variant with confirmation for the last variant
@@ -114,6 +56,7 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
           Product Variants
         </h2>
         <button
+          type="button" // Ngăn hành động mặc định của nút
           onClick={addVariant}
           className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
         >
@@ -130,6 +73,9 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
               </th>
               <th className="px-6 py-3 bg-gray-100 text-left text-sm font-medium text-gray-600">
                 Size
+              </th>
+              <th className="px-6 py-3 bg-gray-100 text-center text-sm font-medium text-gray-600">
+                Price
               </th>
               <th className="px-6 py-3 bg-gray-100 text-center text-sm font-medium text-gray-600">
                 Actions
@@ -158,24 +104,32 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
                     />
                   </td>
                   <td className="px-6 py-3">
-                    <div className="flex gap-3 flex-wrap">
-                      {sizeOptions.map((size) => (
-                        <label
-                          key={size}
-                          className="flex items-center space-x-2 text-sm"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={variant.size.includes(size)}
-                            onChange={(e) =>
-                              handleSizeChange(index, size, e.target.checked)
-                            }
-                            className="form-checkbox h-4 w-4 text-blue-600"
-                          />
-                          <span>{size}</span>
-                        </label>
-                      ))}
+                    <div className="flex gap-2 flex-wrap">
+                      {variant.size.length > 0 ? (
+                        variant.size.map((size, sizeIndex) => (
+                          <span
+                            key={sizeIndex}
+                            className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
+                          >
+                            {size}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-500">No size selected</span>
+                      )}
                     </div>
+                  </td>
+
+                  <td className="px-6 py-3">
+                    <input
+                      type="number"
+                      value={variant.price}
+                      onChange={(e) =>
+                        handlePriceChange(index, parseFloat(e.target.value))
+                      }
+                      className="border px-4 py-2 rounded-lg w-full outline-none"
+                      placeholder="Enter Price"
+                    />
                   </td>
                   <td className="px-6 py-3 text-center">
                     <button

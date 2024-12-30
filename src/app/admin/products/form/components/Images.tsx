@@ -1,162 +1,109 @@
-"use client";
-
 import { ChangeEvent } from "react";
-import { AiOutlineUpload } from "react-icons/ai";
 
 interface ImagesProps {
-  data: Record<string, any> | null;
-  featureImage: string | null;
-  setFeatureImage: (value: string | null) => void;
-  imageList: string[];
-  setImageList: (value: string[]) => void;
+  data: {
+    mainImageUrl: File | null | undefined; // Allow undefined here
+    secondaryImageUrls: File[];
+  };
+  setMainImageUrl: (value: File | null) => void;
+  setSecondaryImageUrls: (value: File[]) => void;
   handleData: (key: string, value: any) => void;
 }
 
 export default function Images({
   data,
-  featureImage,
-  setFeatureImage,
-  imageList,
-  setImageList,
+  setMainImageUrl,
+  setSecondaryImageUrls,
   handleData,
 }: ImagesProps) {
-  // Handle feature image change
-  const handleFeatureImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64Image = reader.result as string;
-        setFeatureImage(base64Image);
-        handleData("featureImage", base64Image);
-      };
-      reader.readAsDataURL(file);
-    }
+  // Handle change for the main image (feature image)
+  const handleMainImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setMainImageUrl(file); // Update local state for mainImageUrl
+    handleData("mainImageUrl", file); // Update parent state
   };
 
-  // Handle additional images change
-  const handleImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newImages: string[] = [];
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const base64Image = reader.result as string;
-          newImages.push(base64Image);
-
-          if (newImages.length === files.length) {
-            const updatedImageList = [...imageList, ...newImages];
-            setImageList(updatedImageList);
-            handleData("imageList", updatedImageList);
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
+  // Handle change for the additional images (secondaryImageUrls)
+  const handleSecondaryImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const updatedSecondaryImageUrls = [...data.secondaryImageUrls, ...files];
+    setSecondaryImageUrls(updatedSecondaryImageUrls); // Update local state for secondaryImageUrls
+    handleData("secondaryImageUrls", updatedSecondaryImageUrls); // Update parent state
   };
 
   return (
     <section className="flex-1 flex flex-col gap-6 bg-white border p-6 rounded-xl shadow-md">
       <h2 className="font-semibold text-xl text-gray-800 mb-4">Images</h2>
 
-      {/* Feature Image Section */}
+      {/* Main Image (Feature Image) Section */}
       <div className="flex flex-col gap-4">
-        <label
-          className="text-gray-700 text-sm font-medium"
-          htmlFor="product-feature-image"
+        <label className="text-gray-700 text-sm font-medium">Main Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleMainImageChange}
+          className="hidden"
+          id="main-image"
+        />
+        <button
+          type="button"
+          onClick={() => document.getElementById("main-image")?.click()}
+          className="bg-gray-300 p-2 rounded"
         >
-          Feature Image <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type="file"
-            id="product-feature-image"
-            name="product-feature-image"
-            accept="image/*"
-            onChange={handleFeatureImageChange}
-            className="hidden"
-          />
-          <button
-            type="button"
-            className="flex items-center justify-center bg-gray-300 text-gray-700 px-6 py-2 rounded-lg w-full transition duration-200"
-            onClick={() =>
-              document.getElementById("product-feature-image")?.click()
-            }
-          >
-            <AiOutlineUpload className="mr-2 text-lg" />
-            <span>Choose Feature Image</span>
-          </button>
-        </div>
-
-        {/* Display selected feature image */}
-        {featureImage && (
-          <div className="relative mt-4">
+          Upload Main Image
+        </button>
+        {data.mainImageUrl && (
+          <div>
             <img
-              src={featureImage}
-              alt="Feature Image"
-              className="w-full h-full object-cover rounded-lg border-2 border-gray-200"
+              src={URL.createObjectURL(data.mainImageUrl)}
+              alt="Main Image"
+              className="w-32 h-32 object-cover"
             />
-            <button
-              onClick={() => setFeatureImage(null)}
-              className="absolute top-0 right-0 bg-gray-600 text-white p-2 rounded-full text-xs hover:bg-gray-700 transition duration-200"
-            >
-              ✕
-            </button>
+            <button onClick={() => setMainImageUrl(null)}>Remove</button>
           </div>
         )}
       </div>
 
-      {/* Additional Images Section */}
+      {/* Additional Images (Secondary Image URLs) Section */}
       <div className="flex flex-col gap-4">
-        <label
-          className="text-gray-700 text-sm font-medium"
-          htmlFor="product-images"
-        >
+        <label className="text-gray-700 text-sm font-medium">
           Additional Images
         </label>
-        <div className="relative">
-          <input
-            type="file"
-            id="product-images"
-            name="product-images"
-            accept="image/*"
-            multiple
-            onChange={handleImagesChange}
-            className="hidden"
-          />
-          <button
-            type="button"
-            className="flex items-center justify-center bg-gray-300 text-gray-700 px-6 py-2 rounded-lg w-full transition duration-200"
-            onClick={() => document.getElementById("product-images")?.click()}
-          >
-            <AiOutlineUpload className="mr-2 text-lg" />
-            <span>Choose Additional Images</span>
-          </button>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleSecondaryImagesChange}
+          className="hidden"
+          id="additional-images"
+        />
+        <button
+          type="button"
+          onClick={() => document.getElementById("additional-images")?.click()}
+          className="bg-gray-300 p-2 rounded"
+        >
+          Upload Additional Images
+        </button>
+        <div className="grid grid-cols-3 gap-4">
+          {data.secondaryImageUrls.map((img, index) => (
+            <div key={index}>
+              <img
+                src={URL.createObjectURL(img)}
+                alt={`Secondary Image ${index}`}
+                className="w-32 h-32 object-cover"
+              />
+              <button
+                onClick={() =>
+                  setSecondaryImageUrls(
+                    data.secondaryImageUrls.filter((_, i) => i !== index)
+                  )
+                }
+              >
+                Remove
+              </button>
+            </div>
+          ))}
         </div>
-
-        {/* Display additional images */}
-        {imageList.length > 0 && (
-          <div className="mt-4 grid grid-cols-3 gap-4">
-            {imageList.map((image, index) => (
-              <div key={index} className="relative group">
-                <img
-                  src={image}
-                  alt={`Additional Image ${index + 1}`}
-                  className="w-full h-full object-cover rounded-lg border-2 border-gray-200"
-                />
-                <button
-                  onClick={() =>
-                    setImageList(imageList.filter((_, i) => i !== index))
-                  }
-                  className="absolute top-0 right-0 bg-gray-600 text-white p-2 rounded-full text-xs opacity-0 group-hover:opacity-100 transition duration-200"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </section>
   );

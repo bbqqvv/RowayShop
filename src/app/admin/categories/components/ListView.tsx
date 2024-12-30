@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Spinner } from "@nextui-org/react";
 import { useCategories } from "@/hooks/categories/useCategories";
-import { Category } from "../../types/Category";
+import { Category } from "../../../../types/Category";
 import ImageModal from "@/components/features/ImageModal";
 
 interface ListViewProps {
