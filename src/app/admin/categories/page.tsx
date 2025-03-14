@@ -4,7 +4,6 @@ import Form from "./components/Form";
 import ListView from "./components/ListView";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Category } from "../../../../types/type";
 
 export default function Page() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);

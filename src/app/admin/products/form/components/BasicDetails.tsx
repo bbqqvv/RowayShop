@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { useCategories } from "@/hooks/categories/useCategories";
-import { BasicDetailsProps, Product } from "../../../../../../types/type";
 
 export default function BasicDetails({
   data,
