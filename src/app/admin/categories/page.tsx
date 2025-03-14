@@ -1,19 +1,17 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Form from "./components/Form";
 import ListView from "./components/ListView";
-import { Category } from "../../../types/Category";
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Category } from "../../../../types/type";
 
 export default function Page() {
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-  const handleEdit = (category: Category) => {
-    setSelectedCategory(category); // Cập nhật selectedCategory khi bấm Edit
-  };
+  const handleEdit = useCallback((category: Category) => {
+    setSelectedCategory(category);
+  }, []);
 
   return (
     <main className="flex gap-5 mt-14">

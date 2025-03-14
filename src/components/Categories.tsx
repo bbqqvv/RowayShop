@@ -4,48 +4,46 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useCategories } from "@/hooks/categories/useCategories";
 import Link from "next/link";
+import Image from 'next/image';
 
 export default function Categories() {
-  const { categories, loading, error, fetchCategories } = useCategories(); // Lấy dữ liệu danh mục từ API
+  const { categories, loading, error, fetchCategories } = useCategories();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleItems, setVisibleItems] = useState(5);
 
-  // Cập nhật số phần tử hiển thị dựa trên kích thước màn hình
+  useEffect(() => {
+    fetchCategories();
+    updateVisibleItems();
+    window.addEventListener("resize", updateVisibleItems);
+    return () => window.removeEventListener("resize", updateVisibleItems);
+  }, []);
+
   const updateVisibleItems = () => {
     if (window.innerWidth >= 1024) {
-      setVisibleItems(5); // Desktop
+      setVisibleItems(5);
     } else if (window.innerWidth >= 768) {
-      setVisibleItems(3); // Tablet
+      setVisibleItems(3);
     } else {
-      setVisibleItems(2); // Mobile
+      setVisibleItems(1); // Nếu có 1 danh mục, hiển thị toàn bộ
     }
   };
 
-  useEffect(() => {
-    updateVisibleItems();
-    window.addEventListener("resize", updateVisibleItems);
-    fetchCategories(); // Fetch categories khi component mount
-    return () => {
-      window.removeEventListener("resize", updateVisibleItems);
-    };
-  }, [fetchCategories]);
-
-  const maxIndex = Math.ceil(categories.length / visibleItems);
+  const maxIndex = Math.max(0, categories.length - visibleItems);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % maxIndex);
+    setCurrentIndex((prev) => Math.min(prev + 1, maxIndex));
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + maxIndex) % maxIndex);
+    setCurrentIndex((prev) => Math.max(prev - 1, 0));
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Hiển thị loading khi đang fetch
+    return <div className="text-center py-10 text-gray-700">Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>; // Hiển thị lỗi nếu có
+    return <div className="text-center text-red-500 py-10">Error: {error}</div>;
   }
 
   return (
@@ -56,72 +54,98 @@ export default function Categories() {
         <p className="text-sm text-gray-500">Khám phá các danh mục cao cấp của chúng tôi</p>
       </div>
 
-      {/* Slider */}
-      <div className="relative overflow-hidden">
-        {/* Categories Container */}
-        <div
-          className="flex transition-transform duration-300"
-          style={{
-            transform: `translateX(-${currentIndex * (100 / visibleItems)}%)`,
-            width: `${categories.length * (100 / visibleItems)}%`,
-            justifyContent:
-              categories.length <= visibleItems ? "center" : "flex-start", // Căn giữa nếu số lượng danh mục ít
-            gap: "16px", // Thêm khoảng cách giữa các phần tử
-          }}
-        >
-          {categories.map((category) => (
-            <div
-              key={category.id}
-              className="flex-shrink-0"
-              style={{ width: `${100 / visibleItems}%` }}
-            >
-              <div className="flex flex-col md:flex-row bg-[#F6F6F6] rounded-lg p-4 transition duration-200">
-                {/* Tên và liên kết ở bên trái (dành cho màn hình lớn) */}
-                <div className="flex flex-col w-full md:w-1/2 mb-4 md:mb-0">
-                  <h1 className="text-xl font-medium text-gray-800">
-                    {category.name}
-                  </h1>
-                  <Link
-                    href={`/categories/${category.slug}`}
-                    passHref
-                    className="bg-white rounded-full text-center font-bold mt-4 hover:bg-red-200"
-                  >
-                    See More
-                    {/* <ArrowRight className="ml-2 h-4 w-4" /> */}
-                  </Link>
-                </div>
-
-                {/* Ảnh ở bên phải (dành cho màn hình lớn) */}
-                <div className="flex justify-center w-full md:w-1/2">
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className="w-full h-auto object-cover rounded-md"
-                  />
-                </div>
+      {/* Kiểm tra nếu chỉ có 1 danh mục */}
+      {categories.length === 1 ? (
+        <div className="flex justify-center">
+          <div className="w-full max-w-sm">
+            <div className="flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+              {/* Image */}
+              <div className="relative overflow-hidden rounded-t-lg">
+                <Image
+                  src={categories[0]?.image || "/default-category.jpg"}
+                  alt={categories[0]?.name || "Danh mục"}
+                  width={300}
+                  height={192}
+                  className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105 rounded-lg"
+                />
+              </div>
+              {/* Category Info */}
+              <div className="p-4 flex flex-col flex-grow">
+                <h2 className="text-lg font-semibold text-gray-800 mb-2">{categories[0].name}</h2>
+                <Link
+                  href={`/categories/${categories[0].slug}`}
+                  className="mt-auto bg-gray-900 text-white px-4 py-2 rounded-full text-center hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center"
+                >
+                  Xem thêm
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </div>
             </div>
-          ))}
+          </div>
         </div>
+      ) : (
+        /* Slider */
+        <div className="relative overflow-hidden">
+          <div
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{
+              transform: `translateX(-${currentIndex * (100 / visibleItems)}%)`,
+              width: `${categories.length * (100 / visibleItems)}%`,
+            }}
+          >
+            {categories.map((category) => (
+              <div key={category.id} className="flex-shrink-0 p-2" style={{ width: `${100 / visibleItems}%` }}>
+                <div className="flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 h-full border border-gray-200">
+                  {/* Image */}
+                  <div className="relative overflow-hidden rounded-t-lg">
+                    <Image
+                      src={category.image || "/default-category.jpg"}
+                      alt={category.name || "Category"}
+                      width={400} // Tuỳ chỉnh kích thước phù hợp
+                      height={192} // Tương ứng với h-48 (48 * 4 = 192)
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                      className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                      priority
+                      onError={(e) => (e.currentTarget.src = "/default-category.jpg")}
+                    />
 
-        {/* Nút điều hướng */}
-        {categories.length > visibleItems && (
-          <>
-            <button
-              onClick={prevSlide}
-              className="absolute top-1/2 left-3 transform -translate-y-1/2 bg-gray-300 p-2 rounded-full shadow hover:bg-gray-500 transition"
-            >
-              <ChevronLeft className="h-4 w-4 text-white" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-gray-300 p-2 rounded-full shadow hover:bg-gray-500 transition"
-            >
-              <ChevronRight className="h-4 w-4 text-white" />
-            </button>
-          </>
-        )}
-      </div>
+                  </div>
+
+                  {/* Category Info */}
+                  <div className="p-4 flex flex-col flex-grow">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-2">{category.name}</h2>
+                    <Link
+                      href={`/categories/${category.slug}`}
+                      className="mt-auto bg-gray-900 text-white px-4 py-2 rounded-full text-center hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center"
+                    >
+                      Xem thêm
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Navigation Buttons */}
+          {categories.length > visibleItems && (
+            <>
+              <button
+                onClick={prevSlide}
+                className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition-all duration-200"
+              >
+                <ChevronLeft className="h-6 w-6 text-gray-700" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition-all duration-200"
+              >
+                <ChevronRight className="h-6 w-6 text-gray-700" />
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

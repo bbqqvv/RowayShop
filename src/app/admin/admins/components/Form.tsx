@@ -4,6 +4,7 @@ import { Button } from "@nextui-org/react";
 import { useState, ChangeEvent, useEffect } from "react";
 import { AiOutlineUpload } from "react-icons/ai"; // Import icon từ react-icons
 import ImageModal from "@/components/features/ImageModal";
+import Image from 'next/image';
 
 
 // Định nghĩa kiểu dữ liệu cho state
@@ -122,7 +123,7 @@ export default function Form() {
           {/* Hiển thị ảnh thumbnail */}
           {imageUrl && (
             <div className="mt-3 flex justify-center">
-              <img
+              <Image
                 src={imageUrl}
                 alt="Selected"
                 className="w-24 h-24 object-cover rounded-lg shadow-md cursor-pointer"

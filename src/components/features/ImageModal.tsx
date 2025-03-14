@@ -1,5 +1,6 @@
 // ImageModal.tsx
 import React from "react";
+import Image from 'next/image';
 
 interface ImageModalProps {
   imageUrl: string | null;
@@ -22,11 +23,15 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, isOpen, onClose }) =>
           </button>
         </div>
         <div className="flex justify-center mt-4">
-          <img
-            src={imageUrl || ""}
+          <Image
+            src={imageUrl || "/default-image.jpg"}
             alt="Selected"
+            width={500}
+            height={500}
             className="max-w-full max-h-[500px] object-contain"
+            onError={(e) => ((e.currentTarget.src = "/default-image.jpg"))}
           />
+
         </div>
       </div>
     </div>

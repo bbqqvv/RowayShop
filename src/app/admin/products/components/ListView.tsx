@@ -1,48 +1,48 @@
-"use client"
+"use client";
 import { Button, CircularProgress } from "@nextui-org/react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Row from "./Row";
-import { useProducts } from "@/hooks/products/useProducts"; // Giả sử bạn đã tạo custom hook này
-import { toast } from "react-toastify"; // Thêm react-toastify
-import "react-toastify/dist/ReactToastify.css"; // Import CSS của react-toastify
+import { useProducts } from "@/hooks/products/useProducts";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ListView() {
-  const [pageLimit, setPageLimit] = useState<number>(10); // Limit of products per page
-  const { products, loading, error, fetchProducts, deleteExistingProduct } =
-    useProducts();
+  const {
+    products,
+    loading,
+    error,
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+    fetchProducts,
+    deleteExistingProduct
+  } = useProducts(1, 10); // Bắt đầu từ page 1, pageSize 10
 
   useEffect(() => {
-    fetchProducts(); 
-  }, [fetchProducts, pageLimit]);
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleNextPage = () => {
-    // Tăng số lượng sản phẩm mỗi trang
-    setPageLimit((prev) => prev + 10);
+    setPage((prev) => prev + 1);
   };
 
   const handlePrePage = () => {
-    // Giảm số lượng sản phẩm mỗi trang nếu pageLimit > 10
-    if (pageLimit > 10) {
-      setPageLimit((prev) => prev - 10);
-    }
+    setPage((prev) => Math.max(1, prev - 1));
   };
 
   const handleDelete = async (id: number) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this product?");
-
     if (confirmDelete) {
       try {
-        await deleteExistingProduct(id); // Gọi API xóa sản phẩm
-        fetchProducts(); // Fetch lại danh sách sản phẩm sau khi xóa
-        toast.success("Product deleted successfully!"); // Thông báo thành công
+        await deleteExistingProduct(id);
+        toast.success("Product deleted successfully!");
       } catch (error) {
-        console.error("Error deleting product:", error);
-        toast.error("Error deleting product!"); // Thông báo thất bại
+        toast.error("Error deleting product!");
       }
     }
   };
 
-  // Xử lý khi đang tải hoặc có lỗi
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -64,70 +64,34 @@ export default function ListView() {
       <table className="border-separate border-spacing-y-3 w-full">
         <thead>
           <tr>
-            <th className="font-semibold border-y bg-white px-3 py-2 border-l rounded-l-lg">
-              SN
-            </th>
+            <th className="font-semibold border-y bg-white px-3 py-2 border-l rounded-l-lg">SN</th>
             <th className="font-semibold border-y bg-white px-3 py-2">Image</th>
-            <th className="font-semibold border-y bg-white px-3 py-2 text-left">
-              Name
-            </th>
-            <th className="font-semibold border-y bg-white px-3 py-2 text-left">
-              Price
-            </th>
-            <th className="font-semibold border-y bg-white px-3 py-2 text-left">
-              Stock
-            </th>
-            <th className="font-semibold border-y bg-white px-3 py-2 text-left">
-              Orders
-            </th>
-            <th className="font-semibold border-y bg-white px-3 py-2 text-left">
-              Status
-            </th>
-            <th className="font-semibold border-y bg-white px-3 py-2 border-r rounded-r-lg text-center">
-              Actions
-            </th>
+            <th className="font-semibold border-y bg-white px-3 py-2 text-left">Name</th>
+            <th className="font-semibold border-y bg-white px-3 py-2 text-left">Price</th>
+            <th className="font-semibold border-y bg-white px-3 py-2 text-left">Stock</th>
+            <th className="font-semibold border-y bg-white px-3 py-2 text-left">Orders</th>
+            <th className="font-semibold border-y bg-white px-3 py-2 text-left">Status</th>
+            <th className="font-semibold border-y bg-white px-3 py-2 border-r rounded-r-lg text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {products.slice(0, pageLimit).map((item, index) => (
-            <Row
-              key={item.id}
-              index={index + 1} // Chỉ mục bắt đầu từ 1
-              item={item}
-              onUpdate={function (id: number): void {
-                throw new Error("Function not implemented.");
-              }}
-              onDelete={handleDelete} // Truyền hàm handleDelete vào
-            />
+          {products.map((item, index) => (
+            <Row key={item.id} index={index} item={item} onUpdate={() => { }} onDelete={handleDelete} />
           ))}
         </tbody>
       </table>
       <div className="flex justify-between text-sm py-3">
-        <Button
-          isDisabled={loading || pageLimit <= 10}
-          onClick={handlePrePage}
-          size="sm"
-          variant="bordered"
-        >
+        <Button isDisabled={loading || page === 1} onClick={handlePrePage} size="sm" variant="bordered">
           Previous
         </Button>
-        <select
-          value={pageLimit}
-          onChange={(e) => setPageLimit(Number(e.target.value))}
-          className="px-5 rounded-xl"
-        >
+        <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="px-5 rounded-xl">
           <option value={3}>3 Items</option>
           <option value={5}>5 Items</option>
           <option value={10}>10 Items</option>
           <option value={20}>20 Items</option>
           <option value={100}>100 Items</option>
         </select>
-        <Button
-          isDisabled={loading || products.length === 0}
-          onClick={handleNextPage}
-          size="sm"
-          variant="bordered"
-        >
+        <Button isDisabled={loading || products.length === 0} onClick={handleNextPage} size="sm" variant="bordered">
           Next
         </Button>
       </div>

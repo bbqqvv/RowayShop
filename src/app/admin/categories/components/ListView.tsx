@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+"use client";
+import { useState, useEffect, useCallback } from "react";
 import { Spinner } from "@nextui-org/react";
 import { useCategories } from "@/hooks/categories/useCategories";
-import { Category } from "../../../../types/Category";
 import ImageModal from "@/components/features/ImageModal";
+import Image from 'next/image';
 
 interface ListViewProps {
   handleEdit: (category: Category) => void;
@@ -26,21 +27,28 @@ export default function ListView({ handleEdit }: ListViewProps) {
     fetchCategories();
   }, [fetchCategories]);
 
-  const handleDelete = async (id: number) => {
+  // Handle delete category
+  const handleDelete = useCallback(async (id: number) => {
     if (confirm("Are you sure you want to delete this category?")) {
-      await deleteExistingCategory(id);
+      try {
+        await deleteExistingCategory(id);
+      } catch (err) {
+        console.error("Error deleting category:", err);
+      }
     }
-  };
+  }, [deleteExistingCategory]);
 
-  const openModal = (imageUrl: string) => {
+  // Open Image Modal
+  const openModal = useCallback((imageUrl: string) => {
     setSelectedImage(imageUrl);
     setModalOpen(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  // Close Image Modal
+  const closeModal = useCallback(() => {
     setSelectedImage(null);
     setModalOpen(false);
-  };
+  }, []);
 
   return (
     <main className="bg-white p-6 rounded-xl flex flex-col gap-6 shadow-lg flex-1">
@@ -48,14 +56,20 @@ export default function ListView({ handleEdit }: ListViewProps) {
         <h1 className="text-xl font-semibold">List Categories</h1>
       </div>
 
+      {/* Loading Spinner */}
       {loading && (
         <div className="text-center text-blue-500">
           <Spinner size="lg" /> Fetching categories...
         </div>
       )}
+
+      {/* Error Message */}
       {error && <div className="text-red-500 text-center">{error}</div>}
+
+      {/* Success or Info Message */}
       {message && <div className="text-green-500 text-center">{message}</div>}
 
+      {/* Categories Table */}
       {!loading && categories.length > 0 ? (
         <div className="overflow-hidden rounded-lg border border-gray-200">
           <table className="min-w-full bg-white text-sm text-left text-gray-500">
@@ -80,12 +94,16 @@ export default function ListView({ handleEdit }: ListViewProps) {
                 <tr key={category.id} className="border-b hover:bg-gray-50">
                   <td className="px-6 py-4 text-center">{index + 1}</td>
                   <td className="px-6 py-4">
-                    <img
-                      src={category.image}
-                      alt={category.name}
+                    <Image
+                      src={category.image || "/default-image.jpg"}
+                      alt={category.name || "Category"}
+                      width={40} // 10 * 4 (h-10 w-10)
+                      height={40} // 10 * 4 (h-10 w-10)
                       className="h-10 w-10 rounded-md object-cover cursor-pointer"
-                      onClick={() => openModal(category.image)} // Open modal on click
+                      onClick={() => openModal(category.image)}
+                      onError={(e) => (e.currentTarget.src = "/default-image.jpg")}
                     />
+
                   </td>
                   <td className="px-6 py-4 font-medium text-gray-800">
                     {category.name}
@@ -117,7 +135,7 @@ export default function ListView({ handleEdit }: ListViewProps) {
         )
       )}
 
-      {/* Render ImageModal with selected image */}
+      {/* Render Image Modal with selected image */}
       <ImageModal
         imageUrl={selectedImage}
         isOpen={isModalOpen}

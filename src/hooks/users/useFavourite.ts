@@ -1,110 +1,80 @@
-// hooks/users/useFavourite.ts
+import { addFavourite, getFavourites, removeFavourite } from "@/services/favouriteService";
 import { useState, useEffect, useCallback } from "react";
-import {
-  getAllCategoriesByToken,
-  addFavourite,
-  deleteFavourite,
-} from "@/services/favouriteService";
-import {
-  getFavouritesFromCookie,
-  saveFavouritesToCookie,
-} from "@/types/cookieUtils";
+import Cookies from "js-cookie";
 
-export const useFavourite = (token: string | null) => {
-  const [favourites, setFavourites] = useState<any[]>([]); // Khởi tạo favourites là mảng rỗng
+const COOKIE_NAME = "favourites";
+
+export const useFavourite = () => {
+  const [favourites, setFavourites] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
-  const syncFavouritesToDatabase = useCallback(async () => {
-    if (!token) return;
+  /** 🔄 Lấy danh sách yêu thích từ API và lưu vào cookie */
+  const fetchFavourites = useCallback(async () => {
+    setLoading(true);
+    setError("");
 
     try {
-      setLoading(true);
-      setError(""); 
-      const response = await getAllCategoriesByToken(token);
-      if (response && response.data && Array.isArray(response.data)) {
-        setFavourites(response.data);
-      } else {
-        setError("No favourites found.");
+      const cachedFavourites = Cookies.get(COOKIE_NAME);
+      if (cachedFavourites) {
+        setFavourites(JSON.parse(cachedFavourites)); // Load từ cookie trước
       }
+
+      const response = await getFavourites(); // Gọi API lấy dữ liệu mới nhất
+      setFavourites(response);
+      Cookies.set(COOKIE_NAME, JSON.stringify(response), { expires: 7 }); // Lưu vào cookie
     } catch (err) {
-      setError("Failed to sync favourites.");
-      console.error("Failed to sync favourites:", err);
+      console.error("❌ Lỗi khi lấy danh sách yêu thích:", err);
+      setError("Không thể lấy danh sách yêu thích.");
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (token) {
-      syncFavouritesToDatabase();
+    fetchFavourites();
+  }, [fetchFavourites]);
+
+  /** ❤️ Thêm sản phẩm vào danh sách yêu thích */
+  const addNewFavourite = useCallback(async (productId: number) => {
+    try {
+      const newFavourite = await addFavourite(productId);
+      setFavourites((prev) => {
+        const updatedFavourites = [...prev, newFavourite];
+        Cookies.set(COOKIE_NAME, JSON.stringify(updatedFavourites), { expires: 7 });
+        return updatedFavourites;
+      });
+    } catch (err) {
+      console.error("❌ Lỗi khi thêm vào danh sách yêu thích:", err);
     }
-  }, [token, syncFavouritesToDatabase]);
+  }, []);
 
-  const addNewFavourite = useCallback(
-    async (productId: number) => {
-      if (!token) {
-        const updatedFavourites = [...favourites, { productId }];
-        setFavourites(updatedFavourites);
-        saveFavouritesToCookie(updatedFavourites);
-        return;
-      }
-
-      try {
-        const newFavourite = await addFavourite(productId, token);
-        const updatedFavourites = [...favourites, newFavourite];
-        setFavourites(updatedFavourites);
-        saveFavouritesToCookie(updatedFavourites);
-      } catch (err) {
-        console.error("Failed to add favourite:", err);
-      }
-    },
-    [token, favourites]
-  );
-
-  const removeFavourite = useCallback(
-    async (productId: number) => {
-      if (!token) {
-        const updatedFavourites = favourites.filter(
-          (fav) => fav.productId !== productId
-        );
-        setFavourites(updatedFavourites);
-        saveFavouritesToCookie(updatedFavourites);
-        return;
-      }
-
-      try {
-        await deleteFavourite(token, productId);
-        const updatedFavourites = favourites.filter(
-          (fav) => fav.productId !== productId
-        );
-        setFavourites(updatedFavourites);
-        saveFavouritesToCookie(updatedFavourites);
-      } catch (err) {
-        console.error("Failed to remove favourite:", err);
-      }
-    },
-    [token, favourites]
-  );
-
-  useEffect(() => {
-    const favouritesFromCookie = getFavouritesFromCookie();
-    if (Array.isArray(favouritesFromCookie)) {
-      setFavourites(favouritesFromCookie);
-    } else {
-      setFavourites([]); 
+  /** ❌ Xóa sản phẩm khỏi danh sách yêu thích */
+  const removeFavouriteItem = useCallback(async (productId: number) => {
+    try {
+      await removeFavourite(productId);
+      setFavourites((prev) => {
+        const updatedFavourites = prev.filter((fav) => fav.id !== productId);
+        Cookies.set(COOKIE_NAME, JSON.stringify(updatedFavourites), { expires: 7 });
+        return updatedFavourites;
+      });
+    } catch (err) {
+      console.error("❌ Lỗi khi xóa sản phẩm khỏi danh sách yêu thích:", err);
     }
+  }, []);
 
-    if (token) {
-      syncFavouritesToDatabase();
+  /** 🔄 Toggle trạng thái yêu thích */
+  const toggleFavourite = useCallback(async (productId: number) => {
+    try {
+      if (favourites.some((fav) => fav.id === productId)) {
+        await removeFavouriteItem(productId);
+      } else {
+        await addNewFavourite(productId);
+      }
+    } catch (err) {
+      console.error("❌ Lỗi khi toggle yêu thích:", err);
     }
-  }, [token, syncFavouritesToDatabase]);
+  }, [favourites, addNewFavourite, removeFavouriteItem]);
 
-  return {
-    favourites,
-    loading,
-    error,
-    addNewFavourite,
-    removeFavourite,
-  };
+  return { favourites, loading, error, toggleFavourite, removeFavourite: removeFavouriteItem };
 };

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
-import Slider from "react-slick"; // import react-slick
+import Slider from "react-slick";
+import Image from "next/image";
 
 // Import CSS của slick-carousel
 import "slick-carousel/slick/slick.css";
@@ -9,42 +10,37 @@ import "slick-carousel/slick/slick-theme.css";
 export default function BannerSlider() {
   // Cấu hình cho react-slick
   const settings = {
-    dots: true, // Hiển thị các dots (nút điều hướng)
-    infinite: true, // Lặp lại khi đạt cuối
-    speed: 500, // Thời gian chuyển động giữa các slide
-    slidesToShow: 1, // Số lượng slide hiển thị cùng lúc
-    slidesToScroll: 1, // Số lượng slide di chuyển khi ấn nút
-    autoplay: true, // Tự động chuyển slide
-    autoplaySpeed: 4000, // Thời gian tự động chuyển slide (4s)
-    arrows: false, // Hiển thị các mũi tên điều hướng
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    arrows: false,
   };
+
+  // Danh sách ảnh banner
+  const banners = [
+    "/banner1.jpg",
+    "/banner2.jpg",
+    "/banner3.jpg",
+  ];
 
   return (
     <div className="slider-container w-full mx-auto">
       <Slider {...settings}>
-        {/* Các slide banner */}
-        <div className="w-full h-full">
-          <img
-            className="w-full h-full object-contain"
-            src="banner1.jpg"
-            alt="Banner 1"
-          />
-        </div>
-        <div className="w-full h-full">
-          <img
-            className="w-full h-full object-contain"
-            src="banner1.jpg"
-            alt="Banner 2"
-          />
-        </div>
-        <div className="w-full h-full">
-          <img
-            className="w-full h-full object-contain"
-            src="banner1.jpg"
-            alt="Banner 3"
-          />
-        </div>
-        {/* Thêm nhiều slide nếu cần */}
+        {banners.map((src, index) => (
+          <div key={index} className="relative w-full h-[400px]">
+            <Image
+              src={src}
+              alt={`Banner ${index + 1}`}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        ))}
       </Slider>
     </div>
   );

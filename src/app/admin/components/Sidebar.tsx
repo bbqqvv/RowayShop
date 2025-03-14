@@ -18,6 +18,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import router from "next/router";
 import toast from "react-hot-toast"; // Thêm toast để hiển thị thông báo
+import Image from 'next/image';
 
 // Khai báo kiểu dữ liệu cho menu item
 interface MenuItem {
@@ -81,7 +82,7 @@ export default function Sidebar({ closeSidebar }: SidebarProps) {
       {/* Logo */}
       <div className="flex justify-center mb-6">
         <Link href="/">
-          <img className="h-8" src="/logo.png" alt="Logo" />
+          <Image height={8} src="/logo.png" alt="Logo" />
         </Link>
       </div>
 

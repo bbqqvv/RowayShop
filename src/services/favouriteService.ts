@@ -1,38 +1,38 @@
 import axios from "axios";
+import Cookies from "js-cookie"; // 🆕 Dùng để lấy token từ cookie
 
+// ✅ Khởi tạo axios client
 const apiClient = axios.create({
-  baseURL: "http://localhost:8080/api/favourites", // Base URL
+  baseURL: "http://localhost:8080/api/favourites",
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true, // 🔥 Quan trọng: Cho phép gửi cookie theo request
 });
-export const getAllCategoriesByToken = async (token: string) => {
-  const response = await apiClient.get("", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
 
-  return response.data;
-};
-
-// favouriteService.ts
-export const addFavourite = async (productId: number, token: string) => {
-  console.log("Token farvourire: ", token);
-  const response = await apiClient.post(
-    "", // Thêm thông tin cần thiết vào URL (ví dụ /add)
-    { productId }, // Truyền productId vào trong body request
-    {
-      headers: {
-        Authorization: `Bearer ${token}`, // Thêm token vào header
-      },
+// ✅ Thêm Interceptor để tự động chèn token vào header
+apiClient.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = Cookies.get("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  );
+  }
+  return config;
+});
+
+// ✅ API lấy danh sách sản phẩm yêu thích
+export const getFavourites = async () => {
+  const response = await apiClient.get("");
+  return response.data?.data || []; 
+};
+
+// ✅ API thêm sản phẩm vào danh sách yêu thích
+export const addFavourite = async (productId: number) => {
+  const response = await apiClient.post("", { productId });
   return response.data;
 };
 
-export const deleteFavourite = async (token: string, productId: number) => {
-  const response = await apiClient.delete(`/${productId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+// ✅ API xóa sản phẩm khỏi danh sách yêu thích
+export const removeFavourite = async (productId: number) => {
+  const response = await apiClient.delete(`/${productId}`);
   return response.data;
 };

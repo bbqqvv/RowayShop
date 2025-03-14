@@ -1,129 +1,56 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 
-// Tạo axios client với baseURL chung
-const apiClient = axios.create({
-  baseURL: "http://localhost:8080/api/products", // Base URL
+// 🔹 Cấu hình Axios
+const API_BASE_URL = "http://localhost:8080"; // Thay đổi thành API của bạn
+const api = axios.create({
+  baseURL: API_BASE_URL,
   headers: {
-    "Content-Type": "multipart/form-data", // Đảm bảo rằng content type là multipart/form-data khi gửi ảnh và dữ liệu
+    "Content-Type": "application/json",
   },
 });
-// Lấy danh sách tất cả sản phẩm
-export const getAllProducts = async (): Promise<any> => {
-  try {
-    const response: AxiosResponse = await apiClient.get("");
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || "Failed to fetch products"
-    );
-  }
-};
-// Lấy danh sách sản phẩm theo danh mục
-// Lấy danh sách sản phẩm theo danh mục và phân trang
-export const getAllProductsByCategory = async (
-  categoryId: number,
-): Promise<any> => {
-  try {
-    // Gọi API và truyền cả categoryId và page vào URL
-    const response: AxiosResponse = await apiClient.get(
-      `/find-by-category/${categoryId}`
-    );
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || "Failed to fetch products by category"
-    );
-  }
+
+// 🟢 Lấy danh sách sản phẩm (có phân trang)
+export const getProducts = async (page = 0, pageSize = 10): Promise<PaginatedResponse<Product>> => {
+  const response = await api.get(`/api/products?page=${page}&size=${pageSize}`);
+  return response.data;
 };
 
-
-// Lấy thông tin sản phẩm theo ID
-export const getProductById = async (id: string | number): Promise<any> => {
-  try {
-    const response: AxiosResponse = await apiClient.get(`/${id}`);
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || `Failed to fetch product with ID ${id}`
-    );
-  }
-};
-// Lấy thông tin sản phẩm theo ID
-export const getProductBySlug = async (slug: string | number): Promise<any> => {
-  try {
-    const response: AxiosResponse = await apiClient.get(`/slug/${slug}`);
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || `Failed to fetch product with ID ${slug}`
-    );
-  }
-};
-// Lấy thông tin sản phẩm theo ID
-export const getProductByCategorySlug = async (slug: string | number): Promise<any> => {
-  try {
-    const response: AxiosResponse = await apiClient.get(`/find-by-category-slug/${slug}`);
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || `Failed to fetch product with ID ${slug}`
-    );
-  }
-};
-// Tạo mới một sản phẩm
-export const createProduct = async (
-  token: string,
-  formData: FormData
-): Promise<any> => {
-  try {
-    const response: AxiosResponse = await apiClient.post("", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || "Failed to create product"
-    );
-  }
+// 🟢 Lấy sản phẩm theo ID
+export const getProductById = async (id: number): Promise<Product> => {
+  const response = await api.get(`/api/products/${id}`);
+  return response.data;
 };
 
-// Cập nhật một sản phẩm
-export const updateProduct = async (
-  token: string,
-  id: string | number,
-  formData: FormData
-): Promise<any> => {
-  try {
-    const response: AxiosResponse = await apiClient.put(`/${id}`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || `Failed to update product with ID ${id}`
-    );
-  }
+// 🟢 Lấy sản phẩm theo Slug
+export const getProductBySlug = async (slug: string): Promise<Product> => {
+  const response = await api.get(`/api/products/slug/${slug}`);
+  return response.data;
 };
 
-// Xóa một sản phẩm
-export const deleteProduct = async (
-  token: string,
-  id: string | number
-): Promise<any> => {
-  try {
-    const response: AxiosResponse = await apiClient.delete(`/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message || `Failed to delete product with ID ${id}`
-    );
-  }
+// 🟢 Lấy sản phẩm theo danh mục
+export const getProductsByCategory = async (categorySlug: string, page = 0, pageSize = 10): Promise<PaginatedResponse<Product>> => {
+  const response = await api.get(`/api/products/category/${categorySlug}?page=${page}&size=${pageSize}`);
+  return response.data;
+};
+
+// 🔵 Thêm sản phẩm mới
+export const createProduct = async (productData: FormData): Promise<Product> => {
+  const response = await api.post("/api/products", productData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+// 🟡 Cập nhật sản phẩm
+export const updateProduct = async (id: number, productData: FormData): Promise<Product> => {
+  const response = await api.put(`/api/products/${id}`, productData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+// 🔴 Xóa sản phẩm
+export const deleteProduct = async (id: number): Promise<boolean> => {
+  const response = await api.delete(`/api/products/${id}`);
+  return response.data === "Deleted";
 };

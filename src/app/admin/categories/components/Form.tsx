@@ -1,17 +1,17 @@
 "use client";
-
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, useCallback, FormEvent, ChangeEvent } from "react";
 import { Button, Spinner } from "@nextui-org/react";
 import { AiOutlineUpload } from "react-icons/ai";
 import { useCategories } from "@/hooks/categories/useCategories";
 import ImageModal from "@/components/features/ImageModal";
-import { Category } from "../../../../types/Category";
 import SizeModal from "@/components/features/SizeModal";
+import Image from 'next/image';
 
 interface FormData {
   name: string;
   slug: string;
-  sizes?: string[]; // Update to array type
+  sizes: string[]; // Array of sizes
+  image?: File | null;
 }
 
 interface FormProps {
@@ -19,8 +19,12 @@ interface FormProps {
 }
 
 export default function Form({ selectedCategory }: FormProps) {
-  const [data, setData] = useState<FormData>({ name: "", slug: "", sizes: [] });
-  const [image, setImage] = useState<File | null>(null);
+  const [data, setData] = useState<FormData>({
+    name: "",
+    slug: "",
+    sizes: [],
+    image: null,
+  });
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
@@ -29,34 +33,44 @@ export default function Form({ selectedCategory }: FormProps) {
   const { createNewCategory, updateExistingCategory, loading, error } =
     useCategories();
 
+  // Cập nhật form data khi selectedCategory thay đổi
   useEffect(() => {
     if (selectedCategory) {
       setData({
         name: selectedCategory.name,
         slug: selectedCategory.slug,
-        sizes: selectedCategory.sizes || [],
+        sizes: selectedCategory.sizes ? selectedCategory.sizes.map(size => size.name) : [],
+        image: null, // Do not prefill with image file
       });
       setImageUrl(selectedCategory.image || null);
     }
   }, [selectedCategory]);
 
-  const handleDataChange = (key: keyof FormData, value: string | string[]) => {
+  // Xử lý thay đổi dữ liệu
+  const handleDataChange = useCallback((key: keyof FormData, value: string | string[]) => {
     setData((prevData) => ({
       ...prevData,
       [key]: value,
     }));
-  };
+  }, []);
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // Xử lý thay đổi hình ảnh
+  const handleImageChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
-      setImage(file);
+      setData((prevData) => ({
+        ...prevData,
+        image: file,
+      }));
       setImageUrl(URL.createObjectURL(file));
       setMessage(null);
     }
-  };
+  }, []);
 
-  const handleCreateOrUpdate = async () => {
+  // Xử lý gửi form
+  const handleSubmit = useCallback(async (e: FormEvent) => {
+    e.preventDefault();
+
     if (!data.name || !data.slug) {
       setMessage("Name and slug are required.");
       return;
@@ -65,8 +79,13 @@ export default function Form({ selectedCategory }: FormProps) {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("slug", data.slug);
-    if (image) formData.append("image", image);
-    if (data.sizes?.length) formData.append("sizes", JSON.stringify(data.sizes));
+
+    // Append sizes
+    data.sizes.forEach((size, index) => {
+      formData.append(`sizes[${index}].name`, size);
+    });
+
+    if (data.image) formData.append("image", data.image);
 
     try {
       if (selectedCategory) {
@@ -76,37 +95,33 @@ export default function Form({ selectedCategory }: FormProps) {
         await createNewCategory(formData);
         setMessage("Category created successfully!");
       }
-      setData({ name: "", slug: "", sizes: [] });
-      setImage(null);
-      setImageUrl(null);
-    } catch {
+      resetForm(); // Reset form sau khi thành công
+    } catch (err) {
       setMessage(error || "An error occurred.");
     }
-  };
+  }, [data, selectedCategory, error, updateExistingCategory, createNewCategory]);
+  // Reset form
+  const resetForm = useCallback(() => {
+    setData({ name: "", slug: "", sizes: [], image: null });
+    setImageUrl(null);
+    setMessage(null);
+  }, []);
 
-  const openSizeModal = () => setIsSizeModalOpen(true);
-  const closeSizeModal = () => setIsSizeModalOpen(false);
-  const openImageModal = () => setIsImageModalOpen(true);
-  const closeImageModal = () => setIsImageModalOpen(false);
+  // Mở/đóng modal
+  const openSizeModal = useCallback(() => setIsSizeModalOpen(true), []);
+  const closeSizeModal = useCallback(() => setIsSizeModalOpen(false), []);
+  const openImageModal = useCallback(() => setIsImageModalOpen(true), []);
+  const closeImageModal = useCallback(() => setIsImageModalOpen(false), []);
 
   return (
     <div className="flex flex-col gap-4 bg-white rounded-xl p-6 w-full md:w-[400px] shadow-lg">
       <h1 className="font-semibold text-lg text-gray-800 mb-4">
         {selectedCategory ? "Update Category" : "Create Category"}
       </h1>
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleCreateOrUpdate();
-        }}
-      >
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {/* Image Upload */}
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="category-image"
-            className="text-gray-600 text-sm font-medium"
-          >
+          <label htmlFor="category-image" className="text-gray-600 text-sm font-medium">
             Image <span className="text-red-500">*</span>
           </label>
           <div
@@ -115,33 +130,35 @@ export default function Form({ selectedCategory }: FormProps) {
           >
             <AiOutlineUpload className="mr-2 text-xl text-blue-500" />
             <span className="text-gray-600">
-              {image ? "Change Image" : "Click to select an image"}
+              {data.image ? "Change Image" : "Click to select an image"}
             </span>
           </div>
           <input
             id="category-image"
             type="file"
+            accept="image/*"
             onChange={handleImageChange}
             className="hidden"
           />
           {imageUrl && (
             <div className="mt-3 flex justify-center">
-              <img
-                src={imageUrl}
+              <Image
+                src={imageUrl || "/default-image.jpg"}
                 alt="Selected"
+                width={96} // w-24 (24 * 4)
+                height={96} // h-24 (24 * 4)
                 className="w-24 h-24 object-cover rounded-lg shadow-md cursor-pointer"
                 onClick={openImageModal}
+                onError={(e) => (e.currentTarget.src = "/default-image.jpg")}
               />
+
             </div>
           )}
         </div>
 
         {/* Name Input */}
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="category-name"
-            className="text-gray-600 text-sm font-medium"
-          >
+          <label htmlFor="category-name" className="text-gray-600 text-sm font-medium">
             Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -156,10 +173,7 @@ export default function Form({ selectedCategory }: FormProps) {
 
         {/* Slug Input */}
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="category-slug"
-            className="text-gray-600 text-sm font-medium"
-          >
+          <label htmlFor="category-slug" className="text-gray-600 text-sm font-medium">
             Slug <span className="text-red-500">*</span>
           </label>
           <input
@@ -174,10 +188,7 @@ export default function Form({ selectedCategory }: FormProps) {
 
         {/* Size Input */}
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="category-sizes"
-            className="text-gray-600 text-sm font-medium"
-          >
+          <label htmlFor="category-sizes" className="text-gray-600 text-sm font-medium">
             Sizes
           </label>
           <button
@@ -185,12 +196,12 @@ export default function Form({ selectedCategory }: FormProps) {
             onClick={openSizeModal}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
-            {data.sizes?.length
+            {data.sizes.length
               ? `Manage Sizes (${data.sizes.length})`
               : "Add Sizes"}
           </button>
           <div className="mt-2 flex gap-2 flex-wrap">
-            {data.sizes?.map((size) => (
+            {data.sizes.map((size) => (
               <span
                 key={size}
                 className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-sm"
@@ -215,9 +226,8 @@ export default function Form({ selectedCategory }: FormProps) {
 
       {message && (
         <div
-          className={`mt-4 text-sm font-medium ${
-            error ? "text-red-500" : "text-green-500"
-          }`}
+          className={`mt-4 text-sm font-medium ${error ? "text-red-500" : "text-green-500"
+            }`}
         >
           {message}
         </div>
@@ -228,7 +238,7 @@ export default function Form({ selectedCategory }: FormProps) {
         isOpen={isSizeModalOpen}
         onClose={closeSizeModal}
         onSave={(sizes) => handleDataChange("sizes", sizes)}
-        initialSizes={data.sizes || []}
+        initialSizes={data.sizes}
       />
 
       {/* Image Modal */}

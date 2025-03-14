@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent } from "react";
-
+import Image from "next/image";
 interface ImagesProps {
   data: Record<string, any> | null; // Dữ liệu sản phẩm
   featureImage: string | null; // Hình ảnh nổi bật
@@ -59,11 +59,16 @@ export default function Images({
       {/* Hiển thị ảnh đã chọn */}
       {featureImage && (
         <div className="mt-2">
-          <img
-            src={featureImage}
+          <Image
+            src={featureImage || "/default-image.jpg"}
             alt="Feature"
+            width={600} // Điều chỉnh tùy vào layout
+            height={160} // Tương ứng với h-40 (40 * 4 = 160px)
             className="w-full h-40 object-cover rounded-md border"
+            priority
+            onError={(e) => (e.currentTarget.src = "/default-image.jpg")}
           />
+
         </div>
       )}
     </section>

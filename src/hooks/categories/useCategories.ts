@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAuthContext } from "@/contexts/AuthContext"; // Import useAuthContext
+import { useAuthContext } from "@/contexts/AuthContext";
 import {
   getAllCategories,
   createCategory,
@@ -9,11 +9,12 @@ import {
 import axios from "axios";
 
 export const useCategories = () => {
-  const { token } = useAuthContext(); 
-  const [categories, setCategories] = useState<any[]>([]); // Khởi tạo categories là mảng
+  const { token } = useAuthContext();
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+
   // Hàm xử lý lỗi từ API
   const handleAxiosError = (err: unknown) => {
     if (axios.isAxiosError(err)) {
@@ -28,11 +29,9 @@ export const useCategories = () => {
     setError("");
     setMessage("");
     try {
-      const categoriesData = await getAllCategories(); 
-      console.log(categoriesData); 
-
-      if (categoriesData?.data && Array.isArray(categoriesData.data)) {
-        setCategories(categoriesData.data); 
+      const response = await getAllCategories();
+      if (response?.data && Array.isArray(response.data)) {
+        setCategories(response.data);
       } else {
         setError("No categories found.");
       }
@@ -42,6 +41,7 @@ export const useCategories = () => {
       setLoading(false);
     }
   }, []);
+
   // Tạo mới một danh mục
   const createNewCategory = useCallback(
     async (formData: FormData) => {
@@ -51,13 +51,11 @@ export const useCategories = () => {
       setMessage("");
       try {
         const newCategory = await createCategory(token, formData);
-      
         setCategories((prevCategories) => {
-          // Nếu prevCategories không phải mảng, khởi tạo mảng mới
           if (!Array.isArray(prevCategories)) {
             return [newCategory];
           }
-          return [...prevCategories, newCategory]; // Nếu là mảng, thêm newCategory vào
+          return [...prevCategories, newCategory];
         });
         setMessage("Category created successfully!");
       } catch (err) {
@@ -77,14 +75,13 @@ export const useCategories = () => {
       setError("");
       setMessage("");
       try {
-        const updatedCategory = await updateCategory(token, id, formData); // Pass FormData
+        const updatedCategory = await updateCategory(token, id, formData);
         setCategories((prevCategories) =>
-          // Kiểm tra và đảm bảo prevCategories là mảng
           Array.isArray(prevCategories)
             ? prevCategories.map((category) =>
                 category.id === id ? updatedCategory : category
               )
-            : [updatedCategory] // Nếu không phải mảng, tạo một mảng mới chứa updatedCategory
+            : [updatedCategory]
         );
         setMessage("Category updated successfully!");
       } catch (err) {
@@ -104,12 +101,11 @@ export const useCategories = () => {
       setError("");
       setMessage("");
       try {
-        await deleteCategory(token, id); // Truyền token vào
+        await deleteCategory(token, id);
         setCategories((prevCategories) =>
-          // Kiểm tra và đảm bảo prevCategories là mảng
           Array.isArray(prevCategories)
             ? prevCategories.filter((category) => category.id !== id)
-            : [] // Nếu không phải mảng, trả về mảng rỗng
+            : []
         );
         setMessage("Category deleted successfully!");
       } catch (err) {
