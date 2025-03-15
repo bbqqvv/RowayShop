@@ -9,14 +9,6 @@ import useAuth from "@/hooks/auth/useAuth"; // Import custom hook useAuth
 interface LoginResponse {
   token: string;
 }
-
-// Định nghĩa các lỗi có thể xảy ra trong quá trình login
-interface LoginPageProps {
-  username: string;
-  password: string;
-  localError: string;
-}
-
 export default function LoginPage() {
   const { handleLogin, loading, error } = useAuth(); // Sử dụng hook custom useAuth
   const [username, setUsername] = useState<string>(""); // State cho username
@@ -95,9 +87,8 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className={`${
-              loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
-            } text-white rounded-lg px-4 py-2`}
+            className={`${loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+              } text-white rounded-lg px-4 py-2`}
             disabled={loading}
           >
             {loading ? (
@@ -115,7 +106,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-sm text-gray-600 mt-4 text-center">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a href="/sign-up" className="text-blue-500 hover:underline">
             Sign up here
           </a>

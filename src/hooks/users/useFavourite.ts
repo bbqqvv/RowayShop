@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 const COOKIE_NAME = "favourites";
 
 export const useFavourite = () => {
-  const [favourites, setFavourites] = useState<any[]>([]);
+  const [favourites, setFavourites] = useState<FavouriteItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 

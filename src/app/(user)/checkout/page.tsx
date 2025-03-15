@@ -14,27 +14,27 @@ const mockCart = [
 
 const Payment = () => {
   const [paymentMethod, setPaymentMethod] = useState("COD");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [discountCode, setDiscountCode] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
   const [selectedAddress, setSelectedAddress] = useState(null); // State để theo dõi địa chỉ được chọn
-
   const {
     addresses,
     loading,
     error,
-    addAddress,
-    updateAddress,
-    removeAddress,
-    setDefaultAddress,
+    // addAddress,
+    // updateAddress,
+    // removeAddress,
+    // setDefaultAddress,
   } = useAddresses();
 
   // Tính toán tổng tiền từ mockCart
   const subtotal = mockCart.reduce((total, item) => total + item.price * item.quantity, 0);
   const total = subtotal - discountAmount; // Tổng tiền không bao gồm phí ship
 
-  const applyDiscount = () => {
-    setDiscountAmount(discountCode === "SALE50" ? 50000 : 0);
-  };
+  // const applyDiscount = () => {
+  //   setDiscountAmount(discountCode === "SALE50" ? 50000 : 0);
+  // };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -150,7 +150,7 @@ const Payment = () => {
               width={48}
               height={48}
               className="rounded object-cover"
-              onError={(e) => (e.currentTarget.src = "/images/default-product.jpg")}
+              onError={(e) => (e.currentTarget.src = "default-product.png")}
             />                <div>
               <p className="text-sm">{item.name}</p>
               <p className="text-gray-500 text-xs">{item.size} / {item.material}</p>

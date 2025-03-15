@@ -2,8 +2,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Product } from "../../../types/type";
-
 
 const Breadcrumb: React.FC = () => {
   const pathname = usePathname();
@@ -33,9 +31,8 @@ const Breadcrumb: React.FC = () => {
           throw new Error("Dữ liệu sản phẩm không hợp lệ!");
         }
         setProduct(data.data); // Sử dụng `data.data`
-      } catch (err: any) {
-        console.error("❌ Lỗi khi tải sản phẩm:", err.message);
-        setError(err.message);
+      } catch (err) {
+        console.error(err instanceof Error? err.message:"❌ Lỗi khi tải sản phẩm:");
       } finally {
         setLoading(false);
       }

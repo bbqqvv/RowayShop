@@ -6,18 +6,8 @@ import { useCart } from "@/hooks/cart/useCart";
 import Image from 'next/image';
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addItemToCart, loading } = useCart(); // Sử dụng hook useCart để thêm sản phẩm vào giỏ hàng
-
-  if (!product)
-    return (
-      <p className="text-center text-red-500">
-        Dữ liệu sản phẩm không khả dụng.
-      </p>
-    );
-
+  const { addItemToCart, loading } = useCart(); 
   const defaultImage = "/default-image.jpg";
-
-  // Trạng thái sản phẩm
   const initialVariant = product.variants[0] || null;
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(
     initialVariant
@@ -26,6 +16,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [selectedImage, setSelectedImage] = useState(
     selectedVariant?.imageUrl || product.mainImageUrl || defaultImage
   );
+
+  if (!product)
+    return (
+      <p className="text-center text-red-500">
+        Dữ liệu sản phẩm không khả dụng.
+      </p>
+    );
 
   // Danh sách màu sắc
   const allColors = product.variants.map((variant) => variant.color);
@@ -97,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       {/* Ảnh chính */}
       <div className="w-full md:w-1/2">
-        <ProductImageZoom imageUrl={selectedImage} />
+        <ProductImageZoom imageUrl={typeof selectedImage === 'string' ? selectedImage : defaultImage} />
       </div>
 
       {/* Mô tả sản phẩm */}

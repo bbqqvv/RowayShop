@@ -47,13 +47,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [user, setUser] = useState<LoginResponse["user"] | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Restore token and user from cookies
   useEffect(() => {
     const storedToken = getCookie("token") as string | undefined;
     if (storedToken) {
-      // Validate the token if needed here
       setToken(storedToken);
     }
     setLoading(false);
@@ -75,16 +73,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     username: string,
     password: string
   ): Promise<LoginResponse> => {
-    try {
-      setError(null);
-      const data = await loginUser(username, password);
-      if (!data?.token) throw new Error("Token not found in response");
-      setAuthData(data);
-      return data;
-    } catch (err) {
-      setError("Login failed. Please try again.");
-      throw err;
-    }
+    const data = await loginUser(username, password);
+    if (!data?.token) throw new Error("Token not found in response");
+    setAuthData(data);
+    return data;
   };
 
   // Register handler
@@ -93,16 +85,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     password: string,
     email: string
   ): Promise<LoginResponse> => {
-    try {
-      setError(null);
-      const data = await registerUser(username, password, email);
-      if (!data?.token) throw new Error("Token not found in response");
-      setAuthData(data);
-      return data;
-    } catch (err) {
-      setError("Registration failed. Please try again.");
-      throw err;
-    }
+    const data = await registerUser(username, password, email);
+    if (!data?.token) throw new Error("Token not found in response");
+    setAuthData(data);
+    return data;
   };
 
   // Logout handler

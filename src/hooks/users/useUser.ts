@@ -15,7 +15,7 @@ export const useUser = (id?: number) => {
       const data = await userService.getAllUsers();
       setUsers(data);
     } catch (err) {
-      setError("Không thể tải danh sách người dùng.");
+      setError(err instanceof Error? err.message: "Không thể tải danh sách người dùng.");
     } finally {
       setLoading(false);
     }
@@ -28,7 +28,7 @@ export const useUser = (id?: number) => {
       const data = await userService.getUser(userId);
       setUser(data);
     } catch (err) {
-      setError("Không thể tải thông tin người dùng.");
+      setError(err instanceof Error? err.message:"Không thể tải thông tin người dùng.");
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export const useUser = (id?: number) => {
       setUsers((prev) => [...prev, createdUser]);
       return createdUser;
     } catch (err) {
-      setError("Không thể tạo người dùng.");
+      setError(err instanceof Error? err.message: "Không thể tạo người dùng.");
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,7 @@ export const useUser = (id?: number) => {
       setUser(updated);
       return updated;
     } catch (err) {
-      setError("Không thể cập nhật thông tin người dùng.");
+      setError(err instanceof Error? err.message: "Không thể cập nhật thông tin người dùng.");
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export const useUser = (id?: number) => {
       await userService.deleteUser(id);
       setUsers((prev) => prev.filter((user) => user.id !== id));
     } catch (err) {
-      setError("Không thể xóa người dùng.");
+      setError(err instanceof Error? err.message: "Không thể xóa người dùng.");
     } finally {
       setLoading(false);
     }
@@ -100,9 +100,8 @@ export const useUser = (id?: number) => {
         setError(response?.message || "Đổi mật khẩu thất bại.");
         return false;
       }
-    } catch (err: any) {
-      console.error("Lỗi API:", err);
-      setError(err.response?.data?.message || "Mật khẩu cũ không đúng hoặc có lỗi xảy ra.");
+    } catch (err) {
+      setError(err instanceof Error? err.message: "Mật khẩu cũ không đúng hoặc có lỗi xảy ra.");
       return false;
     } finally {
       setLoading(false);

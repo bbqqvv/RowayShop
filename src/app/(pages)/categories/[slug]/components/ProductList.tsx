@@ -7,8 +7,6 @@ interface ProductListProps {
   slug: string;
 }
 const ProductList: React.FC<ProductListProps> = ({ slug }) => {
-  console.log("Slug received in ProductList: ", slug);
-
   const { products, loading, error } = useProducts(slug);
 
   const handleAddToCart = (productId: string) => {
@@ -30,7 +28,7 @@ const ProductList: React.FC<ProductListProps> = ({ slug }) => {
       </div>
 
       <div className="max-w-screen-lg mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product: any) => (
+        {products.map((product: Product) => (
           <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
         ))}
       </div>

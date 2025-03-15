@@ -1,5 +1,7 @@
+"use client";
+
 import { ChangeEvent } from "react";
-import Image from 'next/image';
+import Image from "next/image";
 
 export default function Images({
   data,
@@ -7,99 +9,101 @@ export default function Images({
   setSecondaryImageUrls,
   handleData,
 }: ImagesProps) {
+  if (!data) return null; // Kiểm tra nếu data là null thì không render component
+
+  const { mainImageUrl, secondaryImageUrls } = data; // Tránh truy cập trực tiếp vào data null
+
   const handleMainImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setMainImageUrl(file);
-    handleData("mainImageUrl", file);
+    if (file) {
+      setMainImageUrl(file);
+      handleData("mainImageUrl", file);
+    }
   };
 
-  // Handle change for the additional images (secondaryImageUrls)
   const handleSecondaryImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const updatedSecondaryImageUrls = [...data.secondaryImageUrls, ...files];
-    setSecondaryImageUrls(updatedSecondaryImageUrls);
-    handleData("secondaryImageUrls", updatedSecondaryImageUrls);
+    if (files.length) {
+      const updatedSecondaryImages = [...secondaryImageUrls, ...files];
+      setSecondaryImageUrls(updatedSecondaryImages);
+      handleData("secondaryImageUrls", updatedSecondaryImages);
+    }
+  };
+
+  const removeMainImage = () => {
+    setMainImageUrl(null);
+    handleData("mainImageUrl", "");
+  };
+
+  const removeSecondaryImage = (index: number) => {
+    const updatedSecondaryImages = secondaryImageUrls.filter((_, i) => i !== index);
+    setSecondaryImageUrls(updatedSecondaryImages);
+    handleData("secondaryImageUrls", updatedSecondaryImages);
   };
 
   return (
     <section className="flex-1 flex flex-col gap-6 bg-white border p-6 rounded-xl shadow-md">
-      <h2 className="font-semibold text-xl text-gray-800 mb-4">Images</h2>
-      {/* Main Image (Feature Image) Section */}
-      <div className="flex flex-col gap-4">
+      <h2 className="font-semibold text-xl text-gray-800">Images</h2>
+
+      {/* Main Image Section */}
+      <div className="flex flex-col gap-3">
         <label className="text-gray-700 text-sm font-medium">Main Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleMainImageChange}
-          className="hidden"
-          id="main-image"
-        />
+        <input type="file" accept="image/*" onChange={handleMainImageChange} className="hidden" id="main-image" />
         <button
           type="button"
           onClick={() => document.getElementById("main-image")?.click()}
-          className="bg-gray-300 p-2 rounded"
+          className="bg-gray-300 p-2 rounded-md text-sm"
         >
           Upload Main Image
         </button>
-        {data.mainImageUrl && (
-          <div>
-            <Image
-              src={
-                data.mainImageUrl instanceof File
-                  ? URL.createObjectURL(data.mainImageUrl)
-                  : data.mainImageUrl || "/default-image.jpg"
-              }
-              alt="Main Image"
-              width={128} // Tương ứng với w-32 (32 * 4 = 128px)
-              height={128} // Tương ứng với h-32 (32 * 4 = 128px)
-              className="w-32 h-32 object-cover rounded-md shadow-sm"
-              priority
-              onError={(e) => (e.currentTarget.src = "/default-image.jpg")}
-            />
 
-            <button onClick={() => setMainImageUrl(null)}>Remove</button>
+        {mainImageUrl && (
+          <div className="relative w-32 h-32">
+            <Image
+              src={mainImageUrl instanceof File ? URL.createObjectURL(mainImageUrl) : mainImageUrl}
+              alt="Main Image"
+              width={128}
+              height={128}
+              className="w-full h-full object-cover rounded-md shadow-sm border"
+              priority
+            />
+            <button
+              onClick={removeMainImage}
+              className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full text-xs"
+            >
+              ✕
+            </button>
           </div>
         )}
       </div>
 
-      {/* Additional Images (Secondary Image URLs) Section */}
-      <div className="flex flex-col gap-4">
-        <label className="text-gray-700 text-sm font-medium">
-          Additional Images
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleSecondaryImagesChange}
-          className="hidden"
-          id="additional-images"
-        />
+      {/* Additional Images Section */}
+      <div className="flex flex-col gap-3">
+        <label className="text-gray-700 text-sm font-medium">Additional Images</label>
+        <input type="file" accept="image/*" multiple onChange={handleSecondaryImagesChange} className="hidden" id="additional-images" />
         <button
           type="button"
           onClick={() => document.getElementById("additional-images")?.click()}
-          className="bg-gray-300 p-2 rounded"
+          className="bg-gray-300 p-2 rounded-md text-sm"
         >
           Upload Additional Images
         </button>
+
         <div className="grid grid-cols-3 gap-4">
-          {data.secondaryImageUrls.map((img, index) => (
-            <div key={index}>
+          {secondaryImageUrls.map((img, index) => (
+            <div key={index} className="relative w-32 h-32">
               <Image
-                src={img instanceof File ? URL.createObjectURL(img) : img || "/default-image.jpg"}
+                src={img instanceof File ? URL.createObjectURL(img) : img}
                 alt={`Secondary Image ${index}`}
                 width={128}
                 height={128}
-                className="w-32 h-32 object-cover rounded-md border border-gray-300"
+                className="w-full h-full object-cover rounded-md border border-gray-300"
               />
               <button
-                onClick={() =>
-                  setSecondaryImageUrls(
-                    data.secondaryImageUrls.filter((_, i) => i !== index)
-                  )
-                }
+                onClick={() => removeSecondaryImage(index)}
+                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full text-xs"
               >
-                Remove
+                ✕
               </button>
             </div>
           ))}

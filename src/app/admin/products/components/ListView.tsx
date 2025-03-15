@@ -38,7 +38,7 @@ export default function ListView() {
         await deleteExistingProduct(id);
         toast.success("Product deleted successfully!");
       } catch (error) {
-        toast.error("Error deleting product!");
+        toast.error(error instanceof Error? error.message: "Error deleting product!");
       }
     }
   };

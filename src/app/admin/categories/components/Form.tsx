@@ -86,7 +86,6 @@ export default function Form({ selectedCategory }: FormProps) {
     });
 
     if (data.image) formData.append("image", data.image);
-
     try {
       if (selectedCategory) {
         await updateExistingCategory(selectedCategory.id, formData);
@@ -97,8 +96,8 @@ export default function Form({ selectedCategory }: FormProps) {
       }
       resetForm(); // Reset form sau khi thành công
     } catch (err) {
-      setMessage(error || "An error occurred.");
-    }
+      setMessage(err instanceof Error ? err.message : "An error occurred.");
+    }    
   }, [data, selectedCategory, error, updateExistingCategory, createNewCategory]);
   // Reset form
   const resetForm = useCallback(() => {

@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode } from "react";
-import { AuthProvider } from "@/contexts/AuthContext";
 import useAuth from "@/hooks/auth/useAuth";
 import Link from "next/link";
 

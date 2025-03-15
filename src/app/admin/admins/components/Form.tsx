@@ -1,36 +1,61 @@
 "use client";
-
 import { Button } from "@nextui-org/react";
 import { useState, ChangeEvent, useEffect } from "react";
-import { AiOutlineUpload } from "react-icons/ai"; // Import icon từ react-icons
+import { AiOutlineUpload } from "react-icons/ai";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import ImageModal from "@/components/features/ImageModal";
-import Image from 'next/image';
 
+// 🎯 Danh sách role có thể chọn khi tạo user
+const roles = ["admin", "manager", "staff", "user"];
 
-// Định nghĩa kiểu dữ liệu cho state
-interface FormData {
+// 🛠 Giả lập thông tin người dùng hiện tại (Lấy từ API hoặc Context)
+const currentUser = {
+  id: 1,
+  name: "Admin User",
+  role: "admin", // 👈 Chỉ "admin" hoặc "manager" mới có thể tạo user
+};
+
+// 🏗 Interface dữ liệu user
+interface UserData {
   name: string;
-  slug: string;
   email: string;
+  role: string;
 }
 
-export default function Form() {
-  // Khởi tạo state cho dữ liệu và hình ảnh
-  const [data, setData] = useState<FormData>({ name: "", slug: "", email: "" });
-  const [image, setImage] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null); // State để lưu URL của Blob hình ảnh
-  const [isModalOpen, setIsModalOpen] = useState(false); // State để kiểm tra modal có mở hay không
-  const [errors, setErrors] = useState({ name: false, email: false }); // Trạng thái lỗi cho các trường bắt buộc
+export default function CreateUserForm() {
+  const router = useRouter();
 
-  // Hàm xử lý dữ liệu khi người dùng nhập vào form
-  const handleData = (key: keyof FormData, value: string) => {
+  // ❌ Chặn người không có quyền truy cập
+  if (!["admin", "manager"].includes(currentUser.role)) {
+    return (
+      <div className="text-center text-red-500 text-lg py-10">
+        ❌ Bạn không có quyền tạo người dùng!
+      </div>
+    );
+  }
+
+  // 🔹 State quản lý form nhập dữ liệu
+  const [data, setData] = useState<UserData>({
+    name: "",
+    email: "",
+    role: "staff", // Mặc định tạo nhân viên (staff)
+  });
+
+  const [image, setImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [errors, setErrors] = useState({ name: false, email: false });
+
+  // 🛠 Xử lý nhập liệu form
+  const handleDataChange = (key: keyof UserData, value: string) => {
     setData((prevData) => ({
       ...prevData,
       [key]: value,
     }));
   };
 
-  // Hàm xử lý thay đổi tệp hình ảnh
+  // 📸 Xử lý chọn ảnh
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
@@ -38,165 +63,145 @@ export default function Form() {
     }
   };
 
-  // Hàm để tạo URL Blob từ file hình ảnh
+  // 🔄 Hiển thị ảnh preview
   useEffect(() => {
     if (image) {
       const objectUrl = URL.createObjectURL(image);
       setImageUrl(objectUrl);
-
-      // Clean up URL khi hình ảnh bị thay đổi hoặc component bị unmount
       return () => URL.revokeObjectURL(objectUrl);
     }
   }, [image]);
 
-  // Hàm xử lý kiểm tra dữ liệu hợp lệ trước khi gửi
+  // ✅ Kiểm tra dữ liệu hợp lệ
   const validateForm = () => {
     const newErrors = {
       name: !data.name.trim(),
       email: !data.email.trim(),
     };
     setErrors(newErrors);
-
-    // Trả về true nếu không có lỗi
     return !Object.values(newErrors).includes(true);
   };
 
-  // Hàm xử lý logic khi nhấn nút "Create"
-  const handleCreate = async () => {
-    if (!validateForm()) {
-      return;
+  // 🚀 Gửi dữ liệu lên server để tạo user
+  const handleCreateUser = async () => {
+    if (!validateForm()) return;
+
+    try {
+      // Tạo form data gửi lên API
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("email", data.email);
+      formData.append("role", data.role);
+      if (image) {
+        formData.append("image", image);
+      }
+
+      // Giả lập gọi API
+      console.log("Sending data:", Object.fromEntries(formData));
+
+      // 👉 Điều hướng về danh sách user
+      router.push("/admin/users");
+    } catch (error) {
+      console.error("Error creating user:", error);
     }
-
-    // Xử lý logic gửi dữ liệu
-    console.log("Form submitted", data, image);
-  };
-
-  // Hàm mở modal khi click vào hình ảnh
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  // Hàm đóng modal
-  const closeModal = () => {
-    setIsModalOpen(false);
   };
 
   return (
     <div className="flex flex-col gap-4 bg-white rounded-xl p-6 w-full md:w-[400px] shadow-lg">
-      <h1 className="font-semibold text-lg text-gray-800 mb-4">
-        Create Category
-      </h1>
+      <h1 className="font-semibold text-lg text-gray-800 mb-4">Create User</h1>
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          handleCreate();
+          handleCreateUser();
         }}
       >
-        {/* Input for Image */}
+        {/* 📸 Upload Avatar */}
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="category-image"
-            className="text-gray-600 text-sm font-medium"
-          >
-            Image <span className="text-red-500">*</span>
+          <label className="text-gray-600 text-sm font-medium">
+            Avatar <span className="text-red-500">*</span>
           </label>
-
-          {/* Nút chọn ảnh */}
           <div
             className="border px-4 py-2 rounded-lg w-full text-center cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors duration-200 flex justify-center items-center"
-            onClick={() => document.getElementById("category-image")?.click()}
+            onClick={() => document.getElementById("user-avatar")?.click()}
           >
             <AiOutlineUpload className="mr-2 text-xl text-blue-500" />
             <span className="text-gray-600">Click to select an image</span>
           </div>
-
-          {/* Thực tế là input file ẩn đi */}
           <input
-            id="category-image"
-            name="category-image"
+            id="user-avatar"
             type="file"
             onChange={handleImageChange}
-            className="hidden" // Ẩn input file
+            className="hidden"
           />
-
-          {/* Hiển thị ảnh thumbnail */}
           {imageUrl && (
             <div className="mt-3 flex justify-center">
               <Image
                 src={imageUrl}
-                alt="Selected"
+                alt="Avatar Preview"
                 className="w-24 h-24 object-cover rounded-lg shadow-md cursor-pointer"
-                onClick={openModal} // Mở modal khi click vào ảnh
+                onClick={() => setIsModalOpen(true)}
               />
             </div>
           )}
         </div>
 
-        {/* Input for Name */}
+        {/* 📝 Name Input */}
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="category-name"
-            className="text-gray-600 text-sm font-medium"
-          >
+          <label className="text-gray-600 text-sm font-medium">
             Name <span className="text-red-500">*</span>
           </label>
           <input
-            id="category-name"
-            name="category-name"
             type="text"
-            placeholder="Enter Name"
+            placeholder="Enter name"
             value={data.name}
-            onChange={(e) => handleData("name", e.target.value)}
-            className={`border px-4 py-2 rounded-lg w-full focus:outline-none ${
-              errors.name
-                ? "border-red-500"
-                : "focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => handleDataChange("name", e.target.value)}
+            className={`border px-4 py-2 rounded-lg ${
+              errors.name ? "border-red-500" : "focus:ring-2 focus:ring-blue-500"
             }`}
           />
-          {errors.name && (
-            <p className="text-sm text-red-500">Name is required.</p>
-          )}
         </div>
 
-        {/* Input for Email */}
+        {/* ✉️ Email Input */}
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="category-email"
-            className="text-gray-600 text-sm font-medium"
-          >
+          <label className="text-gray-600 text-sm font-medium">
             Email <span className="text-red-500">*</span>
           </label>
           <input
-            id="category-email"
-            name="category-email"
             type="email"
-            value={data.email}
-            onChange={(e) => handleData("email", e.target.value)}
             placeholder="Enter email"
-            className={`border px-4 py-2 rounded-lg w-full focus:outline-none ${
-              errors.email
-                ? "border-red-500"
-                : "focus:ring-2 focus:ring-blue-500"
+            value={data.email}
+            onChange={(e) => handleDataChange("email", e.target.value)}
+            className={`border px-4 py-2 rounded-lg ${
+              errors.email ? "border-red-500" : "focus:ring-2 focus:ring-blue-500"
             }`}
           />
-          {errors.email && (
-            <p className="text-sm text-red-500">Email is required.</p>
-          )}
         </div>
 
-        {/* Submit Button */}
+        {/* 🏷 Role Selection */}
+        <div className="flex flex-col gap-2">
+          <label className="text-gray-600 text-sm font-medium">Role</label>
+          <select
+            value={data.role}
+            onChange={(e) => handleDataChange("role", e.target.value)}
+            className="border px-4 py-2 rounded-lg"
+          >
+            {roles.map((role) => (
+              <option key={role} value={role}>
+                {role.charAt(0).toUpperCase() + role.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* 🚀 Submit Button */}
         <Button color="primary" type="submit" className="mt-4 w-full">
-          Create
+          Create User
         </Button>
       </form>
 
-      {/* Modal for viewing larger image */}
-      <ImageModal
-        imageUrl={imageUrl}
-        isOpen={isModalOpen}
-        onClose={closeModal} // Sử dụng hàm đóng modal
-      />
+      {/* 🖼 Modal Preview Image */}
+      <ImageModal imageUrl={imageUrl} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

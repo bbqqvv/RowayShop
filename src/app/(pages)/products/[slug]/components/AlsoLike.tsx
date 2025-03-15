@@ -1,19 +1,16 @@
 "use client";
 import { useEffect } from "react";
 import Link from "next/link";
-import AddToCartButton from "@/components/shared/AddToCartButton";
 import { useProducts } from "@/hooks/products/useProducts";
 import Image from 'next/image';
-
-
 
 const ProductList = () => {
   const { products, loading, error, fetchProducts } = useProducts();
 
   useEffect(() => {
     fetchProducts();
-    console.log("Products:", products); // Debugging
-  }, [fetchProducts]);
+  }, [fetchProducts]); 
+
 
   // Hàm xử lý khi thêm sản phẩm vào giỏ
   const handleAddToCart = (productId: string) => {
@@ -122,10 +119,7 @@ const ProductList = () => {
                   >
                     Mua ngay
                   </button>
-                  <AddToCartButton
-                    productId={id}
-                    onAddToCart={() => handleAddToCart(id)}
-                  />
+            
                 </div>
               </div>
             </div>

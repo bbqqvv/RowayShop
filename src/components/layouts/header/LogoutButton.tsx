@@ -23,7 +23,7 @@ export default function LogoutButton() {
           router.push("/login");
           toast.success("Đăng xuất thành công!");
         } catch (error) {
-          toast.error("Lỗi đăng xuất. Vui lòng thử lại.");
+          toast.error(error instanceof Error? error.message : "Lỗi đăng xuất. Vui lòng thử lại.");
         }
       }}
     >

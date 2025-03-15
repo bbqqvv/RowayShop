@@ -2,7 +2,6 @@
 
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
-  Cat,
   Layers2,
   LayoutDashboard,
   LibraryBig,
@@ -13,7 +12,6 @@ import {
   Star,
   User,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import router from "next/router";
@@ -82,7 +80,7 @@ export default function Sidebar({ closeSidebar }: SidebarProps) {
       {/* Logo */}
       <div className="flex justify-center mb-6">
         <Link href="/">
-          <Image height={8} src="/logo.png" alt="Logo" />
+          <Image height={180} width= {180} src="/logo.png" alt="Logo" />
         </Link>
       </div>
 
@@ -104,7 +102,7 @@ export default function Sidebar({ closeSidebar }: SidebarProps) {
             router.push("/login"); // Hoặc có thể dùng router.push("/login") nếu dùng next.js router
             toast.success("Successfully logged out!");
           } catch (error) {
-            toast.error("Error logging out. Please try again.");
+            toast.error(error instanceof Error? error.message: "Error logging out. Please try again.");
           }
         }}
       >

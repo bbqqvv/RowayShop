@@ -8,7 +8,6 @@ import Images from "./components/Images";
 import Description from "./components/Description";
 import VariantsTable from "./components/VariantsTable";
 import { useProducts } from "@/hooks/products/useProducts";
-import Image from 'next/image';
 
 export default function Page() {
   const [data, setData] = useState<Product>({
@@ -36,18 +35,16 @@ export default function Page() {
   ]);
 
   const [categorySizes, setCategorySizes] = useState<{ id: number; name: string }[]>([]);
-  const [category, setCategory] = useState<string>("");
 
   const { loading, createNewProduct } = useProducts();
 
-  const handleData = (key: keyof Product, value: any) => {
-    console.log(`handleData - key: ${key}, value: `, value);
+  const handleData = (key: keyof Product, value: Product[keyof Product] | null) => {
     setData((prevData) => ({ ...prevData, [key]: value }));
   };
 
-  const handleCategoryChange = (categoryId: string, sizes: { id: number; name: string }[]) => {
+  const handleCategoryChange = (categoryId: number, sizes: { id: number; name: string }[]) => {
     console.log(`handleCategoryChange - categoryId: ${categoryId}, sizes: `, sizes);
-    setData((prevData) => ({ ...prevData, categoryId: parseInt(categoryId) }));
+    setData((prevData) => ({ ...prevData, categoryId: categoryId }));
     setCategorySizes(sizes);
   };
 
@@ -198,7 +195,6 @@ export default function Page() {
       updatedAt: new Date(), // Sửa thành kiểu Date
     });
     setVariants([{ id: 0, sizes: [], color: "", imageUrl: null }]); // Sửa thành null để phù hợp với kiểu dữ liệu
-    setCategory("");
   };
 
   return (

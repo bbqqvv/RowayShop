@@ -29,7 +29,7 @@ export const getProductBySlug = async (slug: string): Promise<Product> => {
 
 // 🟢 Lấy sản phẩm theo danh mục
 export const getProductsByCategory = async (categorySlug: string, page = 0, pageSize = 10): Promise<PaginatedResponse<Product>> => {
-  const response = await api.get(`/api/products/category/${categorySlug}?page=${page}&size=${pageSize}`);
+  const response = await api.get(`/api/products/find-by-category-slug/${categorySlug}?page=${page}&size=${pageSize}`);
   return response.data;
 };
 

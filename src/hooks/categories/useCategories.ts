@@ -10,7 +10,7 @@ import axios from "axios";
 
 export const useCategories = () => {
   const { token } = useAuthContext();
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [message, setMessage] = useState<string>("");

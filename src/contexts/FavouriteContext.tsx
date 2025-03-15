@@ -3,7 +3,7 @@ import { createContext, useContext, ReactNode, useMemo } from "react";
 import { useFavourite } from "@/hooks/users/useFavourite";
 
 interface FavouriteContextType {
-  favourites: any[];
+  favourites: FavouriteItem[];
   toggleFavourite: (productId: number) => Promise<void>;
 }
 

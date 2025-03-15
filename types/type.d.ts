@@ -1,8 +1,9 @@
+// --- User-related Interfaces ---
 declare interface User {
-    id?: number; 
+    id?: number;
     username: string;
     email: string;
-    password?: string;  // Mật khẩu chỉ cần khi tạo mới
+    password?: string; // Chỉ cần khi tạo mới
     createdAt?: string;
     updatedAt?: string;
 }
@@ -13,8 +14,7 @@ declare interface ChangePasswordRequest {
     confirmPassword: string;
 }
 
-
-// Kiểu dữ liệu cho phản hồi API có phân trang
+// --- Pagination ---
 declare interface PaginatedResponse<T> {
     code: number;
     message: string;
@@ -26,6 +26,8 @@ declare interface PaginatedResponse<T> {
         items: T[];
     };
 }
+
+// --- Product-related Interfaces ---
 declare interface Product {
     id: number;
     name: string;
@@ -60,14 +62,16 @@ declare interface SizeProduct {
     priceAfterDiscount?: number;
 }
 
+// --- Category ---
 declare interface Category {
     id: number;
     name: string;
     slug: string;
     image?: string;
     sizes: { id: number; name: string }[];
-
 }
+
+// --- Cart-related Interfaces ---
 declare interface Cart {
     id: number;
     userId: number;
@@ -88,8 +92,7 @@ declare interface CartItem {
     inStock: boolean;
 }
 
-
-
+// --- Component Props ---
 declare interface VariantsTableProps {
     variants: Variant[];
     handleVariantChange: (index: number, key: keyof Variant, value: string | File | SizeProduct[]) => void;
@@ -99,26 +102,29 @@ declare interface VariantsTableProps {
 }
 
 declare interface BasicDetailsProps {
-    data: ProductItem;
-    handleData: (key: keyof ProductItem, value: any) => void;
-    handleCategoryChange: (categoryId: string, sizes: { id: number; name: string }[]) => void;
+    data: Product;
+    handleData: <K extends keyof Product>(key: K, value: Product[K]) => void;
+    handleCategoryChange: (categoryId: number, sizes: { id: number; name: string }[]) => void;
 }
 
+// Sửa `ImagesProps` để tránh trùng lặp
 declare interface ImagesProps {
     data: {
         mainImageUrl: string | File | null;
         secondaryImageUrls: (string | File)[];
-    };
+    } | null;
     setMainImageUrl: (value: string | File | null) => void;
     setSecondaryImageUrls: (value: (string | File)[]) => void;
-    handleData: (key: keyof ProductItem, value: any) => void; // Standardized
+    handleData: <K extends keyof Product>(key: K, value: Product[K]) => void;
 }
+
 declare interface DescriptionProps {
     data: {
         description?: string;
     } | null;
-    handleData: (key: keyof ProductItem, value: any) => void;
+    handleData: <K extends keyof Product>(key: K, value: Product[K]) => void;
 }
+
 declare interface RowProps {
     item: {
         id: number;
@@ -135,23 +141,13 @@ declare interface PageProps {
     params: { slug: string };
 }
 
-
 declare interface ProductCardProps {
-    product: {
-        id: string | number;
-        name: string;
-        price: number;
-        salePercentage?: number;
-        mainImageUrl: string;
-        slug: string;
-        mainImageUrl: string | File;
-        secondaryImageUrls: (string | File)[];
-        descriptionImageUrls: (string | File)[];
-        variants: Variant[];
-    };
-    onAddToCart: (productId: string) => void;
+    product: Product;
+    onAddToCart: (productId: number) => void;
 }
-interface FavouriteButtonProps {
+
+// --- Favourite-related Interfaces ---
+declare interface FavouriteButtonProps {
     productId: number;
     token: string | null;
 }
@@ -160,10 +156,9 @@ declare interface FavouriteContextProps {
     favourites: FavouriteItem[];
     toggleFavourite: (productId: number) => void;
 }
-const FavouriteContext = createContext<FavouriteContextProps>({
-    favourites: [], // ✅ Luôn khởi tạo mảng rỗng để tránh lỗi
-    toggleFavourite: () => { },
-});
+
+declare const FavouriteContext: React.Context<FavouriteContextProps>;
+
 declare interface FavouriteItem {
     productId: number;
     id: number;
@@ -171,8 +166,10 @@ declare interface FavouriteItem {
     nameProduct: string;
     price: number | null;
     userId: number;
-    productUrl?: string; // Thêm nếu có URL chi tiết sản phẩm
+    productUrl?: string;
 }
+
+// --- Address ---
 declare interface Address {
     id: number;
     recipientName: string;
@@ -181,7 +178,7 @@ declare interface Address {
     district: string;
     commune: string;
     addressLine: string;
-    note?: string; // Có thể không bắt buộc
+    note?: string;
     phoneNumber: string;
     email: string;
     defaultAddress: boolean;

@@ -8,7 +8,9 @@ import Image from "next/image";
 const FavouritesPage = () => {
   const { token } = useAuthContext();
   const { favourites, loading, error, removeFavourite } = useFavourite();
+console.log(favourites);
 
+console.log(removeFavourite);
   // ✅ Đảm bảo danh sách yêu thích luôn là một mảng hợp lệ
   const favouriteList = useMemo(() => (Array.isArray(favourites) ? favourites : []), [favourites]);
 

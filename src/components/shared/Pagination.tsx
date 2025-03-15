@@ -91,5 +91,5 @@ const Pagination: React.FC<PaginationProps> = memo(
     );
   }
 );
-
+Pagination.displayName = "Pagination"; // ✅ Thêm displayName
 export default Pagination;

@@ -24,8 +24,8 @@ export default function BasicDetails({
     }
 
     const sizes = selectedCategory.sizes || [];
-    handleData("categoryId", categoryId);
-    handleCategoryChange(categoryId, sizes);
+    handleData("categoryId", parseInt(categoryId));
+    handleCategoryChange(parseInt(categoryId), sizes);
 
     console.log("data", data);
     console.log("Selected Category:", selectedCategory);

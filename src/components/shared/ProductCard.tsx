@@ -6,11 +6,11 @@ import FavouriteButton from "@/components/shared/FavouriteButton";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Image from "next/image";
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { id, name, salePercentage = 0, mainImageUrl, slug, variants = [] } = product;
   
   // Trạng thái để quản lý ảnh được chọn
-  const [selectedImage, setSelectedImage] = useState<string>(mainImageUrl);
+  const [selectedImage, setSelectedImage] = useState<string | File>(mainImageUrl);
 
   // ✅ Tính toán giá sản phẩm tối ưu
   const price = useMemo(() => {
@@ -39,7 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
         <div className="relative aspect-square group overflow-hidden">
           <Link href={`/products/${slug}`} className="block w-full h-full">
             <Image
-              src={selectedImage || "/default-image.jpg"}
+              src={typeof selectedImage === "string" ? selectedImage : "/default-image.jpg"}
               alt={name || "Product"}
               width={300}
               height={300}
@@ -87,7 +87,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
                   selectedImage === imageUrl ? "border-black scale-110 shadow-md" : "border-gray-300"
                 }`}
                 style={{ backgroundColor: color.toLowerCase() }}
-                onClick={() => handleImageChange(imageUrl)}
+                onClick={() => handleImageChange(imageUrl as string)}
                 title={color}
               ></button>
             ))}

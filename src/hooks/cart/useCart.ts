@@ -13,8 +13,8 @@ export const useCart = () => {
       const cartData = await cartService.getCart();
       setCart(cartData);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || "Lỗi khi lấy giỏ hàng");
+    } catch (err) {
+      setError(err instanceof Error? err.message:  "Lỗi khi lấy giỏ hàng");
       setCart(null);
     } finally {
       setLoading(false);
@@ -30,8 +30,8 @@ export const useCart = () => {
     try {
       await cartService.addOrUpdateProduct({ productId, sizeName, color, quantity });
       fetchCart();
-    } catch (err: any) {
-      setError(err.message || "Lỗi khi thêm sản phẩm");
+    } catch (err) {
+      setError(err instanceof Error? err.message:  "Lỗi khi thêm sản phẩm");
     } finally {
       setLoading(false);
     }
@@ -47,8 +47,8 @@ export const useCart = () => {
         color: item.color,
       });
       fetchCart();
-    } catch (err: any) {
-      setError(err.message || "Lỗi khi tăng số lượng");
+    } catch (err) {
+      setError(err instanceof Error? err.message:  "Lỗi khi tăng số lượng");
     } finally {
       setLoading(false);
     }
@@ -68,8 +68,8 @@ export const useCart = () => {
         await cartService.removeProduct(item.productId, item.sizeName, item.color);
       }
       fetchCart();
-    } catch (err: any) {
-      setError(err.message || "Lỗi khi giảm số lượng");
+    } catch (err) {
+      setError(err instanceof Error? err.message:  "Lỗi khi giảm số lượng");
     } finally {
       setLoading(false);
     }
@@ -81,8 +81,8 @@ export const useCart = () => {
     try {
       await cartService.removeProduct(item.productId, item.sizeName, item.color);
       fetchCart();
-    } catch (err: any) {
-      setError(err.message || "Lỗi khi xóa sản phẩm");
+    } catch (err) {
+      setError(err instanceof Error? err.message: "Lỗi khi xóa sản phẩm");
     } finally {
       setLoading(false);
     }
@@ -94,8 +94,8 @@ export const useCart = () => {
     try {
       await cartService.clearCart();
       fetchCart();
-    } catch (err: any) {
-      setError(err.message || "Lỗi khi xóa giỏ hàng");
+    } catch (err) {
+      setError(err instanceof Error? err.message:  "Lỗi khi xóa giỏ hàng");
     } finally {
       setLoading(false);
     }

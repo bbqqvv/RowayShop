@@ -1,10 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Select from "react-select";
+import Select, { SingleValue } from "react-select";
 import { useAddresses } from "@/hooks/address/useAddress";
 import Modal from "react-modal";
 import ChangePassword from "./ChangePassword";
+
+interface OptionType {
+    value: number;
+    label: string;
+}
 
 const Profile: React.FC = () => {
     const {
@@ -17,9 +22,9 @@ const Profile: React.FC = () => {
         setDefaultAddress,
     } = useAddresses();
 
-    const [provinces, setProvinces] = useState<any[]>([]);
-    const [districts, setDistricts] = useState<any[]>([]);
-    const [wards, setWards] = useState<any[]>([]);
+    const [provinces, setProvinces] = useState<OptionType[]>([]);
+    const [districts, setDistricts] = useState<OptionType[]>([]);
+    const [wards, setWards] = useState<OptionType[]>([]);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -40,44 +45,45 @@ const Profile: React.FC = () => {
     // Fetch provinces
     useEffect(() => {
         axios.get("https://provinces.open-api.vn/api/?depth=1").then((res) => {
-            setProvinces(res.data.map((p: any) => ({ value: p.code, label: p.name })));
+            setProvinces(res.data.map((p: { code: number; name: string }) => ({ value: p.code, label: p.name })));
         });
     }, []);
 
     // Handle province change
-    const handleProvinceChange = (selected: any) => {
+    const handleProvinceChange = (selected: SingleValue<OptionType>) => {
         if (!selected) return;
-        setNewAddress({ ...newAddress, province: selected.label, district: "", commune: "" });
+        setNewAddress(prev => ({ ...prev, province: selected.label, district: "", commune: "" }));
 
         axios.get(`https://provinces.open-api.vn/api/p/${selected.value}?depth=2`).then((res) => {
-            setDistricts(res.data.districts.map((d: any) => ({ value: d.code, label: d.name })));
+            setDistricts(res.data.districts.map((d: { code: number; name: string }) => ({ value: d.code, label: d.name })));
             setWards([]);
         });
     };
 
     // Handle district change
-    const handleDistrictChange = (selected: any) => {
+    const handleDistrictChange = (selected: SingleValue<OptionType>) => {
         if (!selected) return;
-        setNewAddress({ ...newAddress, district: selected.label, commune: "" });
+        setNewAddress(prev => ({ ...prev, district: selected.label, commune: "" }));
 
         axios.get(`https://provinces.open-api.vn/api/d/${selected.value}?depth=2`).then((res) => {
-            setWards(res.data.wards.map((w: any) => ({ value: w.code, label: w.name })));
+            setWards(res.data.wards.map((w: { code: number; name: string }) => ({ value: w.code, label: w.name })));
         });
     };
 
+
     // Handle commune change
-    const handleCommuneChange = (selected: any) => {
+    const handleCommuneChange = (selected: SingleValue<OptionType>) => {
         if (!selected) return;
-        setNewAddress({ ...newAddress, commune: selected.label });
+        setNewAddress(prev => ({ ...prev, commune: selected.label }));
     };
 
     // Handle input change
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
-        setNewAddress({
-            ...newAddress,
+        setNewAddress(prev => ({
+            ...prev,
             [name]: type === "checkbox" ? checked : value,
-        });
+        }));
     };
 
     // Handle edit address
@@ -118,6 +124,7 @@ const Profile: React.FC = () => {
         }
         resetForm();
     };
+
 
     return (
         <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-sm">

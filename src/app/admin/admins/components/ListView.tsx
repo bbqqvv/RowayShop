@@ -9,9 +9,9 @@ interface Admin {
 }
 
 const adminList: Admin[] = [
-  { id: 1, name: "John Doe", email: "exam@gmail.com", image: "/images/electronics.jpg" },
-  { id: 2, name: "Jane Smith", email: "exam@gmail.com", image: "/images/home-appliances.jpg" },
-  { id: 3, name: "Sarah Johnson", email: "exam@gmail.com", image: "/images/clothing.jpg" },
+  { id: 1, name: "John Doe", email: "exam@gmail.com", image: "/images/default-image.png" },
+  { id: 2, name: "Jane Smith", email: "exam@gmail.com", image: "/images/default-image.png" },
+  { id: 3, name: "Sarah Johnson", email: "exam@gmail.com", image: "/images/default-image.png" },
 ];
 
 const ListAdmins = () => {
