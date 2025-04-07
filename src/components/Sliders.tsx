@@ -11,28 +11,28 @@ import "slick-carousel/slick/slick-theme.css";
 export default function BannerSlider() {
   // Cấu hình cho react-slick
   const settings = {
-    dots: true, // Hiển thị các dots (nút điều hướng)
-    infinite: true, // Lặp lại khi đạt cuối
-    speed: 500, // Thời gian chuyển động giữa các slide
-    slidesToShow: 1, // Số lượng slide hiển thị cùng lúc
-    slidesToScroll: 1, // Số lượng slide di chuyển khi ấn nút
-    autoplay: true, // Tự động chuyển slide
-    autoplaySpeed: 4000, // Thời gian tự động chuyển slide (4s)
-    arrows: false, // Ẩn mũi tên điều hướng
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    arrows: false,
   };
 
   return (
-    <div className="w-full ">
+    <div className="w-full h-h-full overflow-hidden"> {/* Giới hạn chiều cao */}
       <Slider {...settings}>
-        {/* Các slide banner */}
         {["/banner1.jpg", "/banner1.jpg", "/banner1.jpg"].map((src, index) => (
-          <div key={index} className="relative w-full h-[300px] sm:h-[500px]">
+          <div key={index} className="relative w-full flex justify-center items-center">
             <Image
               src={src}
               alt={`Banner ${index + 1}`}
-              fill
-              className="object-cover"
-              priority={index === 0} // Tải ảnh đầu tiên nhanh hơn
+              width={1920} // Đặt kích thước lớn để tránh bị mờ
+              height={500}
+              className="object-contain h-auto w-full" // Không crop ảnh
+              priority={index === 0}
             />
           </div>
         ))}

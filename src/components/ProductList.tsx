@@ -1,110 +1,199 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useProducts } from "@/hooks/products/useProducts";
 import FavouriteButton from "./shared/FavouriteButton";
 import Image from "next/image";
+import { ShoppingCart } from "lucide-react";
+import ProductHighlight from "./ProductHighlight";
+import ProductSkeleton from "./products/ProductSkeleton";
+import { ProductResponse } from "types/product/product-response.types";
+
+// Constants
+const ITEMS_PER_PAGE = 8;
+const DEFAULT_IMAGE_URL = "images/default-image.png";
 
 const ProductList = () => {
-  const { products, loading, error, fetchProducts } = useProducts();
+  const {
+    products,
+    loading,
+    error,
+    page,
+    totalPages,
+    fetchProducts,
+    setPage,
+  } = useProducts(undefined, 1, ITEMS_PER_PAGE);
+  
   const [selectedImages, setSelectedImages] = useState<Record<number, string>>({});
-  const defaultImageUrl = "/default-product.jpg"; // Đặt ảnh mặc định vào thư mục `/public`
+  const [filterType, setFilterType] = useState("all");
+  const [localLoading, setLocalLoading] = useState(false);
 
+  // Fetch products when page changes
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    const loadProducts = async () => {
+      if (page === 1 && products.length === 0) {
+        // Initial load
+        setLocalLoading(true);
+        await fetchProducts();
+        setLocalLoading(false);
+      } else if (page > 1) {
+        // Subsequent page loads
+        setLocalLoading(true);
+        await fetchProducts();
+        setLocalLoading(false);
+      }
+    };
+    
+    loadProducts();
+  }, [page, fetchProducts]);
 
-  const handleImageChange = (productId: number, imageUrl: string) => {
+  const handleImageChange = useCallback((productId: number, imageUrl: string) => {
     setSelectedImages((prev) => ({ ...prev, [productId]: imageUrl }));
+  }, []);
+
+  // Memoize filtered products
+  const filteredProducts = useMemo(() => {
+    return products.filter(({ salePercentage, featured }) => {
+      if (filterType === "featured") return featured;
+      if (filterType === "discount") return salePercentage > 0;
+      return true;
+    });
+  }, [products, filterType]);
+
+  // Load more products handler
+  const handleLoadMore = useCallback(() => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  }, [page, totalPages, setPage]);
+
+  const ProductCard = ({ product }: { product: ProductResponse }) => {
+    const { id, name, salePercentage = 0, mainImageUrl = "", slug = "", tags = [], variants = [] } = product;
+    const productImage = selectedImages[id] || mainImageUrl || DEFAULT_IMAGE_URL;
+    const price = variants[0]?.sizes[0]?.price ?? 0;
+    const salePrice = salePercentage > 0 ? price * ((100 - salePercentage) / 100) : price;
+
+    return (
+      <div className="bg-white p-4 rounded-lg hover:bg-gray-50 relative overflow-hidden">
+        {salePercentage > 0 && (
+          <div className="absolute top-6 left-6 bg-red-700 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+            {salePercentage}% giảm
+          </div>
+        )}
+
+        <div className="absolute top-6 right-6 z-10">
+          <FavouriteButton product={product} />
+        </div>
+
+        <Link href={`/products/${slug}`} className="block">
+          <div className="relative w-full h-64">
+            <Image
+              src={productImage}
+              alt={name || "Product Image"}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+              className="w-full h-full object-cover rounded-md"
+              priority={id <= ITEMS_PER_PAGE}
+            />
+          </div>
+        </Link>
+
+        <div className="mt-4">
+          <Link href={`/products/${slug}`} className="font-medium text-lg block">
+            {name}
+          </Link>
+
+          {variants.length > 0 && (
+            <div className="mt-2 flex gap-2 flex-wrap">
+              {variants.map(({ color, imageUrl }, index) => (
+                <button
+                  key={index}
+                  className={`w-7 h-7 rounded-full border-2 transition-transform ${productImage === imageUrl ? "border-black scale-110 shadow-md" : "border-gray-300"
+                    }`}
+                  style={{ backgroundColor: color.toLowerCase() }}
+                  onClick={() => handleImageChange(id, imageUrl)}
+                  title={color}
+                  aria-label={`Select ${color} color`}
+                />
+              ))}
+            </div>
+          )}
+
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map((tag, index) => (
+                <span key={index} className="bg-gray-100 text-gray-800 px-3 py-1 text-xs font-medium rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center justify-between">
+            <div>
+              <span className="text-red-500 font-semibold text-2xl">
+                {salePrice.toLocaleString()}đ
+              </span>
+              {salePercentage > 0 && (
+                <span className="line-through text-gray-400 text-sm ml-2">
+                  {price.toLocaleString()}đ
+                </span>
+              )}
+            </div>
+
+            <button
+              className="bg-gray-200 text-black p-2 rounded-full hover:bg-gray-300 transition"
+              aria-label="Add to cart"
+            >
+              <ShoppingCart size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  if (loading) return <p className="text-center text-lg">Loading products...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
-  if (!Array.isArray(products) || products.length === 0)
-    return <p className="text-center text-gray-500">No products available.</p>;
-
   return (
-    <section className="py-10 px-4">
-      <div className="text-center mb-10">
+    <>
+      <ProductHighlight setFilterType={setFilterType} />
+
+      <div className="text-center mb-6">
         <h2 className="text-3xl font-semibold text-gray-900">Sản Phẩm Nổi Bật</h2>
-        <p className="text-gray-500 mt-2 text-sm">Những sản phẩm được khách hàng yêu thích nhất</p>
       </div>
 
-      <div className="max-w-screen-lg mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map(({ id, name, salePercentage = 0, mainImageUrl = "", slug = "", variants = [] }) => {
-          const productImage = selectedImages[id] || mainImageUrl || defaultImageUrl;
-          const price = variants[0]?.sizes[0]?.price ?? 0;
-          const salePrice = salePercentage > 0 ? price * ((100 - salePercentage) / 100) : price;
+      <div className="container mx-auto px-4">
+        {error && (
+          <div className="text-center text-red-500 mb-4">
+            {error}
+          </div>
+        )}
 
-          return (
-            <div
-              key={id}
-              className="bg-white rounded-xl border border-gray-200 shadow-md hover:shadow-xl transition-shadow relative overflow-hidden"
-            >
-              {/* Nút Yêu Thích */}
-              <div className="absolute top-2 right-2 z-10">
-                <FavouriteButton productId={id} />
-              </div>
-
-              {/* Ảnh Sản Phẩm */}
-              <div className="relative aspect-square group overflow-hidden">
-                <Link href={`/products/${slug}`} className="block w-full h-full">
-                  <div className="relative w-full h-64">
-                    <Image
-                      src={productImage || "/default-image.jpg"}
-                      alt={name || "Product Image"}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      priority
-                      onError={(e) => (e.currentTarget.src = "/default-image.jpg")}
-                    />
-                  </div>
-
-                </Link>
-              </div>
-
-              {/* Thông Tin Sản Phẩm */}
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-gray-800 mb-1">
-                  <Link href={`/products/${slug}`} className="hover:text-blue-600 transition-colors">
-                    {name}
-                  </Link>
-                </h3>
-
-                {/* Giá Sản Phẩm */}
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-lg font-medium text-black">{salePrice.toLocaleString()}đ</span>
-                  {salePercentage > 0 && (
-                    <>
-                      <span className="text-sm text-gray-500 line-through">{price.toLocaleString()}đ</span>
-                      <span className="text-sm text-red-500 font-semibold">-{salePercentage}%</span>
-                    </>
-                  )}
-                </div>
-
-                {/* Màu Sắc */}
-                {variants.length > 0 && (
-                  <div className="flex items-center gap-2 mt-2">
-                    {variants.map(({ color, imageUrl }, index) => (
-                      <button
-                        key={index}
-                        className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-transform ${productImage === imageUrl ? "border-black scale-110 shadow-md" : "border-gray-300"
-                          }`}
-                        style={{ backgroundColor: color.toLowerCase() }}
-                        onClick={() => handleImageChange(id, imageUrl)}
-                        title={color}
-                      ></button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-16">
+          {(loading || localLoading) && products.length === 0 ? (
+            Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+              <ProductSkeleton key={`skeleton-${index}`} />
+            ))
+          ) : (
+            filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
+        </div>
       </div>
-    </section>
+
+      {page < totalPages && (
+        <div className="text-center mt-8">
+          <button
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300"
+            onClick={handleLoadMore}
+            disabled={localLoading}
+          >
+            {localLoading ? 'Đang tải...' : 'Xem thêm'}
+          </button>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -1,22 +1,16 @@
 import { ToastContainer } from "react-toastify";
-import Orders from "./components/Orders";
-import Profile from "./components/Profile";
+import "react-toastify/dist/ReactToastify.css"; // Quan trọng: Cần import CSS để Toast hoạt động!
+import { UserProfile } from "./components/UserProfile";
 
 export default function Page() {
-
   return (
     <>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <main className="p-5 flex justify-center">
-        <div className="flex flex-row gap-6">
-          <div className="flex flex-col gap-6">
-            <Profile />
-          </div>
-          <div>
-            <Orders />
-          </div>
-        </div>
+      <main>
+        <UserProfile />
       </main>
+
+      {/* Thêm ToastContainer vào đây */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 }

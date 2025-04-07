@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import Reviews from "./Reviews";
+import { ProductResponse } from "types/product/product-response.types";
 
 interface ProductDescriptionProps {
-  product: Product; // Dữ liệu product từ component cha, chứa description
+  product: ProductResponse; // Dữ liệu sản phẩm từ component cha
 }
 
 const ProductDescription = ({ product }: ProductDescriptionProps) => {
@@ -28,12 +29,14 @@ const ProductDescription = ({ product }: ProductDescriptionProps) => {
   return (
     <div className="wrapper-description font-barlo rounded-lg p-6">
       <div className="w-full max-w-5xl mx-auto">
+        {/* Tabs chuyển đổi giữa Mô tả và Đánh giá */}
         <ul className="tabs flex justify-center space-x-10 border-b-2 border-gray-300 mb-4">
           <li
-            className={`tab-link cursor-pointer pb-2 ${activeTab === "description"
+            className={`tab-link cursor-pointer pb-2 ${
+              activeTab === "description"
                 ? "border-b-2 border-blue-500 text-blue-500"
                 : "text-gray-600 hover:text-blue-500"
-              }`}
+            }`}
             onClick={() => handleTabClick("description")}
           >
             <h3 className="text-lg font-medium transition duration-300">
@@ -41,10 +44,11 @@ const ProductDescription = ({ product }: ProductDescriptionProps) => {
             </h3>
           </li>
           <li
-            className={`tab-link cursor-pointer pb-2 ${activeTab === "reviews"
+            className={`tab-link cursor-pointer pb-2 ${
+              activeTab === "reviews"
                 ? "border-b-2 border-blue-500 text-blue-500"
                 : "text-gray-600 hover:text-blue-500"
-              }`}
+            }`}
             onClick={() => handleTabClick("reviews")}
           >
             <h3 className="text-lg font-medium transition duration-300">
@@ -53,9 +57,10 @@ const ProductDescription = ({ product }: ProductDescriptionProps) => {
           </li>
         </ul>
 
+        {/* Nội dung của từng tab */}
         {activeTab === "description" && (
           <div
-            className="description-content"
+            className="description-content text-gray-700 leading-7"
             dangerouslySetInnerHTML={{ __html: cleanDescription }}
           />
         )}

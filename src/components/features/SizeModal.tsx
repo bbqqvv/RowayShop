@@ -1,11 +1,6 @@
 import React, { useState } from "react";
+import { SizeModalProps } from "types/type";
 
-interface SizeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (sizes: string[]) => void;
-  initialSizes?: string[];
-}
 
 const SizeModal: React.FC<SizeModalProps> = ({
   isOpen,

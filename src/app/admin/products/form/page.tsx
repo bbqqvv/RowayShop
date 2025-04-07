@@ -8,21 +8,22 @@ import Images from "./components/Images";
 import Description from "./components/Description";
 import VariantsTable from "./components/VariantsTable";
 import { useProducts } from "@/hooks/products/useProducts";
+import { ProductRequest, SizeProductRequest, VariantRequest } from "types/product/product-request.type";
 
 export default function Page() {
-  const [data, setData] = useState<Product>({
-    id: 0,
+  const [data, setData] = useState<ProductRequest>({
     name: "",
     slug: "",
     shortDescription: "",
     description: "",
     productCode: "",
+    tags: [],
     featured: false,
     sale: false,
     active: true,
     salePercentage: 0,
     categoryId: 0,
-    mainImageUrl: "", // Sửa thành string | File
+    mainImageUrl: "", 
     secondaryImageUrls: [],
     descriptionImageUrls: [],
     variants: [],
@@ -30,15 +31,15 @@ export default function Page() {
     updatedAt: new Date(), // Sửa thành kiểu Date
   });
 
-  const [variants, setVariants] = useState<Variant[]>([
-    { id: 0, sizes: [], color: "", imageUrl: null }, // Sửa thành null để phù hợp với kiểu dữ liệu
+  const [variants, setVariants] = useState<VariantRequest[]>([
+    { sizes: [], color: "", imageUrl: null }, // Sửa thành null để phù hợp với kiểu dữ liệu
   ]);
 
   const [categorySizes, setCategorySizes] = useState<{ id: number; name: string }[]>([]);
 
   const { loading, createNewProduct } = useProducts();
 
-  const handleData = (key: keyof Product, value: Product[keyof Product] | null) => {
+  const handleData = (key: keyof ProductRequest, value: ProductRequest[keyof ProductRequest] | null) => {
     setData((prevData) => ({ ...prevData, [key]: value }));
   };
 
@@ -48,37 +49,26 @@ export default function Page() {
     setCategorySizes(sizes);
   };
 
-  const handleVariantChange = (index: number, key: keyof Variant, value: string | File | SizeProduct[]) => {
-    console.log(`handleVariantChange - index: ${index}, key: ${key}, value: `, value);
-    const updatedVariants = [...variants];
-    updatedVariants[index] = { ...updatedVariants[index], [key]: value };
-    setVariants(updatedVariants);
-
-    // Cập nhật cả data.variants
-    setData((prevData) => ({
-      ...prevData,
-      variants: updatedVariants,
-    }));
+  const handleVariantChange = (
+    index: number,
+    key: keyof VariantRequest,
+    value: string | File | SizeProductRequest[]
+  ) => {
+    const updated = [...variants];
+    updated[index] = { ...updated[index], [key]: value };
+    setVariants(updated);
+    setData((prev) => ({ ...prev, variants: updated }));
   };
 
-  const addVariant = () => {
-    console.log('addVariant - Adding new variant');
-    setVariants([
-      ...variants,
-      { id: variants.length, sizes: [], color: "", imageUrl: null }, // Sửa thành null để phù hợp với kiểu dữ liệu
-    ]);
+
+const addVariant = () => {
+    setVariants([...variants, { sizes: [], color: "", imageUrl: null }]);
   };
 
   const removeVariant = (index: number) => {
-    console.log(`removeVariant - Removing variant at index: ${index}`);
-    const updatedVariants = variants.filter((_, i) => i !== index);
-    setVariants(updatedVariants);
-
-    // Cập nhật cả data.variants
-    setData((prevData) => ({
-      ...prevData,
-      variants: updatedVariants,
-    }));
+    const updated = variants.filter((_, i) => i !== index);
+    setVariants(updated);
+    setData((prev) => ({ ...prev, variants: updated }));
   };
 
   const generateFormData = () => {
@@ -95,7 +85,10 @@ export default function Page() {
       "stock",
       data.variants?.reduce((sum, variant) => sum + (variant?.sizes?.reduce((sumSize, size) => sumSize + (size?.stock || 0), 0) || 0), 0).toString()
     );
-    formData.append("categoryId", data.categoryId.toString());
+    (data.tags || []).forEach((tag) => {
+      formData.append(`tags`, tag); // tags[0], tags[1]...
+    });
+  
     formData.append("featured", data.featured ? "true" : "false");
     formData.append("sale", data.sale ? "true" : "false");
     formData.append("salePercentage", (data.salePercentage || 0).toString());
@@ -136,9 +129,9 @@ export default function Page() {
             formData.append(
               `variants[${index}].sizes[${sizeIndex}].price`, size.price.toString()
             );
-            if (size.priceAfterDiscount !== undefined) {
+            if (size.price !== undefined) {
               formData.append(
-                `variants[${index}].sizes[${sizeIndex}].priceAfterDiscount`, size.priceAfterDiscount.toString()
+                `variants[${index}].sizes[${sizeIndex}].priceAfterDiscount`, size.price.toString()
               );
             }
           }
@@ -176,9 +169,9 @@ export default function Page() {
   const resetForm = () => {
     console.log('resetForm - Resetting form data');
     setData({
-      id: 0,
       name: "",
       slug: "",
+      tags: [],
       shortDescription: "",
       description: "",
       productCode: "",
@@ -194,13 +187,13 @@ export default function Page() {
       createdAt: new Date(), // Sửa thành kiểu Date
       updatedAt: new Date(), // Sửa thành kiểu Date
     });
-    setVariants([{ id: 0, sizes: [], color: "", imageUrl: null }]); // Sửa thành null để phù hợp với kiểu dữ liệu
+    setVariants([{  sizes: [], color: "", imageUrl: null }]); // Sửa thành null để phù hợp với kiểu dữ liệu
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-5 mt-8">
       <div className="flex justify-between w-full items-center">
-        <h1 className="font-semibold text-xl">Create New Product</h1>
+        <h1 className="font-semibold text-xl">Tạo một sản phẩm mới</h1>
         <Button className="bg-blue-500 font-semibold text-white" type="submit" disabled={loading}>
           {loading ? <Spinner /> : "Create"}
         </Button>

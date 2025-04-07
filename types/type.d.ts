@@ -1,109 +1,27 @@
-// --- User-related Interfaces ---
-declare interface User {
-    id?: number;
-    username: string;
-    email: string;
-    password?: string; // Chỉ cần khi tạo mới
-    createdAt?: string;
-    updatedAt?: string;
-}
+import { ProductRequest, SizeProductRequest, VariantRequest } from "./product/product-request.type";
+import { ProductResponse, VariantResponse } from "./product/product-response.types";
 
-declare interface ChangePasswordRequest {
-    oldPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-}
 
-// --- Pagination ---
-declare interface PaginatedResponse<T> {
-    code: number;
-    message: string;
-    data: {
-        currentPage: number;
-        totalPages: number;
-        pageSize: number;
-        totalElements: number;
-        items: T[];
-    };
-}
 
-// --- Product-related Interfaces ---
-declare interface Product {
-    id: number;
-    name: string;
-    slug: string;
-    shortDescription: string;
-    description: string;
-    productCode: string;
-    featured: boolean;
-    sale: boolean;
-    active: boolean;
-    salePercentage: number;
-    categoryId: number;
-    mainImageUrl: string | File;
-    secondaryImageUrls: (string | File)[];
-    descriptionImageUrls: (string | File)[];
-    variants: Variant[];
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-declare interface Variant {
-    id: number;
+declare interface CheckoutItem {
+    productId: string;
+    size: string;
     color: string;
-    imageUrl: string | File | null;
-    sizes: SizeProduct[];
-}
-
-declare interface SizeProduct {
-    sizeName: string;
-    stock: number;
-    price: number;
-    priceAfterDiscount?: number;
-}
-
-// --- Category ---
-declare interface Category {
-    id: number;
-    name: string;
-    slug: string;
-    image?: string;
-    sizes: { id: number; name: string }[];
-}
-
-// --- Cart-related Interfaces ---
-declare interface Cart {
-    id: number;
-    userId: number;
-    cartItems: CartItem[];
-    totalPrice: number;
-}
-
-declare interface CartItem {
-    id: number;
-    productId: number;
-    productName: string;
-    mainImageUrl: string;
     quantity: number;
-    color: string;
-    sizeName: string;
-    price: number;
-    subtotal: number;
-    inStock: boolean;
 }
-
-// --- Component Props ---
+// Điều chỉnh kiểu của handleVariantChange trong VariantsTableProps
 declare interface VariantsTableProps {
-    variants: Variant[];
-    handleVariantChange: (index: number, key: keyof Variant, value: string | File | SizeProduct[]) => void;
+    variants: VariantRequest[]; // Đảm bảo rằng bạn sử dụng đúng kiểu VariantRequest ở đây
+    handleVariantChange: (index: number, key: keyof VariantRequest, value: string | File | SizeProductRequest[]) => void; // Sử dụng keyof VariantRequest
     addVariant: () => void;
     removeVariant: (index: number) => void;
     categorySizes: { id: number; name: string }[];
 }
 
+
 declare interface BasicDetailsProps {
-    data: Product;
-    handleData: <K extends keyof Product>(key: K, value: Product[K]) => void;
+    data: ProductRequest;
+    handleData: <K extends keyof ProductRequest>(key: K, value: ProductRequest[K]) => void;
     handleCategoryChange: (categoryId: number, sizes: { id: number; name: string }[]) => void;
 }
 
@@ -115,34 +33,48 @@ declare interface ImagesProps {
     } | null;
     setMainImageUrl: (value: string | File | null) => void;
     setSecondaryImageUrls: (value: (string | File)[]) => void;
-    handleData: <K extends keyof Product>(key: K, value: Product[K]) => void;
+    handleData: <K extends keyof ProductRequest>(key: K, value: ProductRequest[K]) => void;
 }
 
 declare interface DescriptionProps {
     data: {
         description?: string;
     } | null;
-    handleData: <K extends keyof Product>(key: K, value: Product[K]) => void;
+    handleData: <K extends keyof ProductRequest>(key: K, value: ProductRequest[K]) => void;
 }
 
 declare interface RowProps {
     item: {
         id: number;
-        mainImageUrl: string | File;
+        mainImageUrl: string;
         name: string;
-        variants?: Variant[];
+        categoryName?: string;
+        variants?: VariantResponse[];
     };
     index: number;
     onUpdate: (id: number) => void;
     onDelete: (id: number) => void;
 }
-
+export interface FilterOptions {
+  colors: string[];
+  sizes: string[];
+  tags: string[];
+  categories: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
+  priceRange: {
+    min: number;
+    max: number;
+  };
+}
 declare interface PageProps {
     params: { slug: string };
 }
 
 declare interface ProductCardProps {
-    product: Product;
+    product: ProductResponse;
     onAddToCart: (productId: number) => void;
 }
 
@@ -159,27 +91,36 @@ declare interface FavouriteContextProps {
 
 declare const FavouriteContext: React.Context<FavouriteContextProps>;
 
-declare interface FavouriteItem {
-    productId: number;
-    id: number;
-    imageUrl: string;
-    nameProduct: string;
-    price: number | null;
-    userId: number;
-    productUrl?: string;
+
+declare interface Voucher {
+    code: string;
+    discountAmount: number;
+    maxDiscountAmount?: number;
+    discountType: "PERCENTAGE" | "FIXED";
+    minOrderValue: number;
+    expiryDate: string;
+    active: boolean;
+}
+declare interface ConfirmationModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    address?: string;
+    paymentMethod?: string;
+    total: number;
+}
+declare interface ImageModalProps {
+  imageUrl: string | null ;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-// --- Address ---
-declare interface Address {
-    id: number;
-    recipientName: string;
-    country: string;
-    province: string;
-    district: string;
-    commune: string;
-    addressLine: string;
-    note?: string;
-    phoneNumber: string;
-    email: string;
-    defaultAddress: boolean;
+interface SizeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (sizes: string[]) => void;
+  initialSizes?: string[];
 }
+interface SuccessModalProps {
+    isOpen: boolean;
+  }

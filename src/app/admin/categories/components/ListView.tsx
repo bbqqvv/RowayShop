@@ -4,9 +4,10 @@ import { Spinner } from "@nextui-org/react";
 import { useCategories } from "@/hooks/categories/useCategories";
 import ImageModal from "@/components/features/ImageModal";
 import Image from 'next/image';
+import { CategoryResponse } from "types/category/category-response.type";
 
 interface ListViewProps {
-  handleEdit: (category: Category) => void;
+  handleEdit: (category: CategoryResponse) => void;
 }
 
 export default function ListView({ handleEdit }: ListViewProps) {

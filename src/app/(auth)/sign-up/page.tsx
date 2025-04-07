@@ -54,7 +54,7 @@ export default function Page() {
         </div>
         <div>
           <h1 className="font-bold text-2xl text-gray-700 mb-4">
-            Create an Account
+            Tạo một tài khoản
           </h1>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email input */}
@@ -63,14 +63,14 @@ export default function Page() {
                 htmlFor="email"
                 className="text-sm font-medium text-gray-600"
               >
-                Email Address
+                Địa chỉ email
               </label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 className="mt-2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -83,14 +83,14 @@ export default function Page() {
                 htmlFor="username"
                 className="text-sm font-medium text-gray-600"
               >
-                Username
+                Tên người dùng
               </label>
               <input
                 type="text"
                 id="username"
                 name="username"
                 className="mt-2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your username"
+                placeholder="Nhập tên người dùng"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -103,14 +103,14 @@ export default function Page() {
                 htmlFor="password"
                 className="text-sm font-medium text-gray-600"
               >
-                Password
+                Mật khẩu
               </label>
               <input
                 type="password"
                 id="password"
                 name="password"
                 className="mt-2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -123,14 +123,14 @@ export default function Page() {
                 htmlFor="confirm-password"
                 className="text-sm font-medium text-gray-600"
               >
-                Confirm Password
+                Nhập lại mật khẩu
               </label>
               <input
                 type="password"
                 id="confirm-password"
                 name="confirm-password"
                 className="mt-2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Confirm your password"
+                placeholder=" Nhập lại mật khẩu"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -152,9 +152,9 @@ export default function Page() {
 
           {/* Link to login */}
           <div className="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{" "}
+           Bạn đã có tài khoản?{" "}
             <a href="/sign-in" className="text-blue-500 hover:underline">
-              Login here
+              Đăng nhập ngay
             </a>
           </div>
         </div>

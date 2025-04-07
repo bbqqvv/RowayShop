@@ -5,18 +5,19 @@ const apiClient = axios.create({
 });
 // Lấy danh sách tất cả các danh mục
 export const getAllCategories = async () => {
-  const response = await apiClient.get(""); // Không cần token cho yêu cầu GET này
-  return response.data;
+  const response = await apiClient.get('');
+  return response.data; // { items: [], currentPage: 0, totalPages: ..., etc. }
 };
+
 
 // Tạo mới một danh mục
 export const createCategory = async (
   token: string,
-  formData: FormData // Dùng FormData để gửi ảnh
+  formData: FormData 
 ) => {
   const response = await apiClient.post("", formData, {
     headers: {
-      "Content-Type": "multipart/form-data", // Đảm bảo là "multipart/form-data" khi gửi ảnh
+      "Content-Type": "multipart/form-data", 
       Authorization: `Bearer ${token}`,
     },
   });
@@ -27,11 +28,11 @@ export const createCategory = async (
 export const updateCategory = async (
   token: string,
   id: number,
-  formData: FormData // Thay đổi: dùng FormData thay vì object
+  formData: FormData 
 ) => {
   const response = await apiClient.put(`/${id}`, formData, {
     headers: {
-      "Content-Type": "multipart/form-data", // Đảm bảo là "multipart/form-data"
+      "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${token}`,
     },
   });

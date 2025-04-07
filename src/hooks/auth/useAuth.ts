@@ -58,7 +58,27 @@ const useAuth = () => {
       setLoading(false);
     }
   };
-
+  // Handle Google login
+  // const handleGoogleLogin = async (googleToken: string): Promise<LoginResponse | void> => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const response = await googleLogin(googleToken);
+  //     if (response && response.token) {
+  //       setToken(response.token);
+  //       setUser(response.user);
+  //       return response;
+  //     } else {
+  //       throw new Error("Google login failed");
+  //     }
+  //   } catch (error) {
+  //     setError("Google login failed. Please try again.");
+  //     console.error("Google login error:", error);
+  //     throw error;
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   return {
     user,
     token,

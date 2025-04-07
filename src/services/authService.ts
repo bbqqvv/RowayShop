@@ -20,6 +20,16 @@ export const loginUser = async (
     throw new Error("Login failed. Please check your credentials.");
   }
 };
+// Google OAuth2 login function
+export const googleLogin = async (googleToken: string): Promise<LoginResponse> => {
+  try {
+    const response = await axios.post(`${API_URL}/oauth2/google`, { token: googleToken });
+    return response.data; // Trả về dữ liệu từ API
+  } catch (error) {
+    console.error("Google login error:", error);
+    throw new Error("Google login failed. Please try again.");
+  }
+};
 
 // Register function
 export const registerUser = async (

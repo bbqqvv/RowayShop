@@ -1,12 +1,7 @@
 // ImageModal.tsx
 import React from "react";
 import Image from 'next/image';
-
-interface ImageModalProps {
-  imageUrl: string | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { ImageModalProps } from "types/type";
 
 const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, isOpen, onClose }) => {
   if (!isOpen) return null;

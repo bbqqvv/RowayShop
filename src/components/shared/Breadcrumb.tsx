@@ -2,62 +2,62 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ProductResponse } from "types/product/product-response.types";
 
 const Breadcrumb: React.FC = () => {
   const pathname = usePathname();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const pathSegments = pathname.split("/").filter(Boolean);
+
+  const [product, setProduct] = useState<ProductResponse | null>(null);
+  
+  // Lấy slug danh mục từ URL (nếu có)
+  const categorySlug = pathSegments.includes("categories") ? pathSegments.pop() : null;
+  
+  // Lấy slug sản phẩm từ URL (nếu có)
+  const productSlug = pathSegments.includes("products") ? pathSegments.pop() : null;
 
   useEffect(() => {
+    if (!productSlug) return; // Chỉ fetch API nếu là trang sản phẩm
+
     const fetchProduct = async () => {
-      setLoading(true);
-      setError(null);
-
-      const slug = pathname.split("/").filter(Boolean).pop(); 
       try {
-        const res = await fetch(`http://localhost:8080/api/products/slug/${slug}`);
+        const res = await fetch(`http://localhost:8080/api/products/slug/${productSlug}`);
+        if (!res.ok) throw new Error("Không tìm thấy sản phẩm");
 
-        if (!res.ok) {
-          throw new Error(`Lỗi API: ${res.status} ${res.statusText}`);
-        }
-
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("API không trả về JSON hợp lệ!");
-        }
         const data = await res.json();
-        if (!data || !data.data || !data.data.name) {
-          throw new Error("Dữ liệu sản phẩm không hợp lệ!");
+        if (data?.data) {
+          setProduct(data.data);
         }
-        setProduct(data.data); // Sử dụng `data.data`
-      } catch (err) {
-        console.error(err instanceof Error? err.message:"❌ Lỗi khi tải sản phẩm:");
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error("Lỗi khi tải sản phẩm:", error);
       }
     };
+
     fetchProduct();
-  }, [pathname]);
-
-  if (loading) {
-    return <p className="text-gray-500">Đang tải...</p>;
-  }
-
-  if (error) {
-    return <p className="text-red-500">Lỗi: {error}</p>;
-  }
-
-  if (!product) return null;
+  }, [productSlug]);
 
   return (
-    <nav className="text-sm text-gray-600 mb-4">
+    <nav className="p-1 text-sm text-gray-600 ml-4">
       <ul className="flex space-x-2">
+        {/* Trang chủ */}
         <li>
           <Link href="/" className="hover:underline">Trang chủ</Link>
           <span className="mx-2">/</span>
         </li>
-        <li className="text-gray-500">{product.name}</li>
+
+        {/* Nếu đang ở danh mục */}
+        {categorySlug && (
+          <li className="text-gray-500 capitalize">
+            {categorySlug.replace(/-/g, " ")}
+          </li>
+        )}
+
+        {/* Nếu đang ở sản phẩm */}
+        {product && (
+          <>
+            <li className="text-gray-500">{product.name}</li>
+          </>
+        )}
       </ul>
     </nav>
   );

@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { addressService } from "@/services/addressService";
+import { AddressResponse } from "types/address/address-response.type";
+import { AddressRequest } from "types/address/address-request.type";
 
 export const useAddresses = () => {
-  const [addresses, setAddresses] = useState<Address[] | null>(null);
+  const [addresses, setAddresses] = useState<AddressResponse[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +28,7 @@ export const useAddresses = () => {
   }, [fetchAddresses]);
 
   // 🔵 Thêm địa chỉ mới
-  const addAddress = async (addressData: Address) => {
+  const addAddress = async (addressData: AddressRequest) => {
     setLoading(true);
     try {
       await addressService.createAddress(addressData);
@@ -39,7 +41,7 @@ export const useAddresses = () => {
   };
 
   // 🟡 Cập nhật địa chỉ
-  const updateAddress = async (id: number, addressData: Address) => {
+  const updateAddress = async (id: number, addressData: AddressRequest) => {
     setLoading(true);
     try {
       await addressService.updateAddress(id, addressData);

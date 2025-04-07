@@ -7,10 +7,11 @@ import {
   deleteCategory,
 } from "@/services/categoryService";
 import axios from "axios";
+import { CategoryResponse } from "types/category/category-response.type";
 
 export const useCategories = () => {
   const { token } = useAuthContext();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [message, setMessage] = useState<string>("");

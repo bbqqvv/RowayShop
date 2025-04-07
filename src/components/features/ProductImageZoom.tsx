@@ -4,7 +4,7 @@ import Image from 'next/image';
 const ProductImageZoom: React.FC<{ imageUrl: string }> = ({ imageUrl }) => {
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
-  const zoomScale = 2.5; // Mức độ phóng to
+  const zoomScale = 2.5; 
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
@@ -14,7 +14,7 @@ const ProductImageZoom: React.FC<{ imageUrl: string }> = ({ imageUrl }) => {
   };
 
   return (
-    <div className="relative border border-gray-300 overflow-hidden cursor-crosshair"
+    <div className="relative border border-gray-300 overflow-hidden rounded-xl cursor-crosshair"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onMouseMove={handleMouseMove}
@@ -22,9 +22,9 @@ const ProductImageZoom: React.FC<{ imageUrl: string }> = ({ imageUrl }) => {
       <Image
         src={imageUrl || "/default-image.jpg"}
         alt="Product"
-        width={300}
-        height={300}
-        className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-60"
+        width={600}
+        height={600}
+        className="object-cover transition-opacity duration-300 group-hover:opacity-60"
         onError={(e) => ((e.currentTarget.src = "/default-image.jpg"))}
         placeholder="blur"
         blurDataURL="/default-image.jpg"

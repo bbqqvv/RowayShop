@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, ReactNode } from "react";
 import { CircularProgress } from "@nextui-org/react";
 import useAuth from "@/hooks/auth/useAuth";
-import AdminLayout from "./components/AdminLayout";
+import AdminLayout from "./sidebar/layout";
 
 interface LayoutProps {
   children: ReactNode;
