@@ -6,11 +6,7 @@ export interface MenuItem {
   icon: ReactNode;
   subItems?: MenuItem[];
 }
-// Define the LayoutProps interface separately
-export interface LayoutProps {
-  children: ReactNode;
-  title?: string;
-}
+
 export interface MenuGroup {
   title: string;
   items: MenuItem[];

@@ -1,13 +1,13 @@
-"use client";
 // src/app/admin/sidebar/layout.tsx
-import {  useState } from "react";
+import { useState, ReactNode } from "react";
 import Sidebar from "./page";
 import Header from "./components/Header";
-import { LayoutProps } from "./components/types";
 
+export interface LayoutProps {
+  children: ReactNode;
+  title?: string;
+}
 
-
-// Define the component and use the LayoutProps for typing
 const AdminLayout = ({ children, title }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -50,5 +50,4 @@ const AdminLayout = ({ children, title }: LayoutProps) => {
   );
 };
 
-// Export the component as default
 export default AdminLayout;
