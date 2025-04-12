@@ -4,11 +4,13 @@ import { ReactNode, useState } from "react";
 import Sidebar from "./page";
 import Header from "./components/Header";
 
-export interface LayoutProps {  // Export interface riêng biệt
+// Define the LayoutProps interface separately
+export interface LayoutProps {
   children: ReactNode;
   title?: string;
 }
 
+// Define the component and use the LayoutProps for typing
 const AdminLayout = ({ children, title }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -51,4 +53,5 @@ const AdminLayout = ({ children, title }: LayoutProps) => {
   );
 };
 
-export default AdminLayout;  // Export component mặc định
+// Export the component as default
+export default AdminLayout;
