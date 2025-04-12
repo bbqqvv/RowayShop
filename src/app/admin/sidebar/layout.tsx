@@ -1,15 +1,14 @@
-"use client";
-
+// src/app/admin/sidebar/layout.tsx
 import { ReactNode, useState } from "react";
 import Sidebar from "./page";
 import Header from "./components/Header";
 
-interface LayoutProps {
+export interface LayoutProps {  // Export interface riêng biệt
   children: ReactNode;
   title?: string;
 }
 
-export default function AdminLayout({ children, title }: LayoutProps) {
+const AdminLayout = ({ children, title }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -35,12 +34,12 @@ export default function AdminLayout({ children, title }: LayoutProps) {
 
       {/* Main Content */}
       <div className="lg:pl-[260px]">
-        <Header 
-          toggleSidebar={toggleSidebar} 
+        <Header
+          toggleSidebar={toggleSidebar}
           title={title}
           className="lg:pl-6"
         />
-        
+
         <main className="p-4 md:p-6">
           <div className="rounded-lg bg-white p-4 md:p-6 shadow-sm">
             {children}
@@ -49,4 +48,6 @@ export default function AdminLayout({ children, title }: LayoutProps) {
       </div>
     </div>
   );
-}
+};
+
+export default AdminLayout;  // Export component mặc định
