@@ -20,7 +20,7 @@ export default function Categories() {
     };
 
     fetchData();
-  }, []);
+  });
 
   useEffect(() => {
     if (categories.length > 5) {

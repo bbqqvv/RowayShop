@@ -51,7 +51,7 @@ export default function GoogleLoginButton() {
         size: "large",
       });
     }
-  }, []);
+  }, [googleSignIn, router]);
 
   return <div ref={buttonRef}></div>;
 }

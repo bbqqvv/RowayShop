@@ -62,7 +62,7 @@ const OrderSummary = () => {
       toast.error("Vui lòng chọn phương thức thanh toán!");
       return;
     }
-    
+
     setShowConfirmationModal(true);
   };
 
@@ -72,7 +72,7 @@ const OrderSummary = () => {
 
     try {
       await orderService.createOrder({
-        addressId: selectedAddress?.id,
+        addressId: selectedAddress?.id ?? 0,
         cartId: cart[0].id,
         discountCode: selectedVoucher?.code || "", // Xử lý trường hợp không có voucher
         paymentMethod: selectedPaymentMethod,
@@ -92,7 +92,7 @@ const OrderSummary = () => {
       setTimeout(() => {
         router.push("/");
       }, 3000);
-    } catch  {
+    } catch {
       toast.error("Thanh toán thất bại. Vui lòng thử lại!");
     } finally {
       setProcessingPayment(false);
@@ -173,7 +173,7 @@ const OrderSummary = () => {
         </button>
       </motion.div>
 
-     <ConfirmationModal
+      <ConfirmationModal
         isOpen={showConfirmationModal}
         onClose={() => setShowConfirmationModal(false)}
         onConfirm={handlePayment}

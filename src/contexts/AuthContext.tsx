@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { setCookie, getCookie, deleteCookie } from "cookies-next";
 import { googleLogin, loginUser, registerUser } from "@/services/authService";
-import { userService } from "@/services/userService";
 import { LoginResponse } from "@/hooks/auth/apiTypes";
 import LoadingScreen from "@/components/shared/LoadingScreen";
 import { UserResponse } from "types/user/user-creation-response.type";
@@ -46,23 +45,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const storedToken = getCookie("token") as string | undefined;
     if (storedToken) {
       setToken(storedToken);
-      fetchUser(storedToken);
     } else {
       setLoading(false);
     }
   }, []);
 
-  const fetchUser = async (token: string) => {
-    try {
-      const userData = await userService.getCurrentUser();
-      setUser(userData);
-    } catch {
-      console.error("Không thể lấy thông tin user");
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const setAuthData = (data: LoginResponse) => {
     setToken(data.token);
@@ -71,8 +58,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       path: "/",
       sameSite: "strict",
     });
-
-    fetchUser(data.token);
   };
 
   const googleSignIn = async (googleToken: string): Promise<LoginResponse> => {

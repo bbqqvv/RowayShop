@@ -19,7 +19,7 @@ const VoucherList: React.FC = () => {
 
   useEffect(() => {
     fetchUserDiscountCodes();
-  },  []);
+  }, [fetchUserDiscountCodes]);
 
   const handleSaveDiscount = async (code: string) => {
     setMessage("");

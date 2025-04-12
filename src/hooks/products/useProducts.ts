@@ -24,48 +24,51 @@ export const useProducts = (
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(initialPage);
-  const [pageSize, setPageSize] = useState<number>(initialPageSize);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [selectedProduct, setSelectedProduct] = useState<ProductResponse | null>(null);
-  const [searchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>(''); // Add searchQuery state
 
-  const handleResponsePagination = (
-    response: ApiResponse<PaginatedResponse<ProductResponse>>
-  ) => {
-    setProducts(response.data.items);
-    setTotalItems(response.data.totalElements);
-    setTotalPages(Math.ceil(response.data.totalElements / pageSize));
-    setError(null);
-  };
+  // Utility function to handle the pagination response
+  const handleResponsePagination = useCallback(
+    (response: ApiResponse<PaginatedResponse<ProductResponse>>) => {
+      setProducts(response.data.items);
+      setTotalItems(response.data.totalElements);
+      setTotalPages(Math.ceil(response.data.totalElements / initialPageSize));
+      setError(null);
+    },
+    [initialPageSize]  // Use initialPageSize here as the size is fixed initially
+  );
 
+  // Utility function for centralized error handling
   const handleError = (err: unknown, message: string) => {
     setError(err instanceof Error ? err.message : message);
-    setProducts([]);
-    setTotalItems(0);
-    setTotalPages(1);
+    setProducts([]);  // Clear the products on error
+    setTotalItems(0);  // Reset total items
+    setTotalPages(1);  // Reset total pages
   };
 
+  // Fetch products based on the category or general fetch
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const response = slug
-        ? await getProductsByCategory(slug, page - 1, pageSize)
-        : await getProducts(page - 1, pageSize);
-
+        ? await getProductsByCategory(slug, page - 1, initialPageSize)
+        : await getProducts(page - 1, initialPageSize);
       handleResponsePagination(response);
     } catch (err) {
       handleError(err, 'Failed to fetch products');
     } finally {
       setLoading(false);
     }
-  }, [slug, page, pageSize]);
+  }, [slug, page, initialPageSize, handleResponsePagination]);
 
+  // Search products by name
   const searchProducts = useCallback(
     async (query: string) => {
       setLoading(true);
       try {
-        const response = await searchProductsByName(query, page - 1, pageSize);
+        const response = await searchProductsByName(query, page - 1, initialPageSize);
         handleResponsePagination(response);
       } catch (err) {
         handleError(err, 'Failed to search products');
@@ -73,17 +76,10 @@ export const useProducts = (
         setLoading(false);
       }
     },
-    [page, pageSize]
+    [page, initialPageSize, handleResponsePagination]
   );
 
-  useEffect(() => {
-    if (searchQuery) {
-      searchProducts(searchQuery);
-    } else {
-      fetchProducts();
-    }
-  }, [searchQuery, fetchProducts, searchProducts]);
-
+  // Fetch product details by ID
   const fetchProductById = useCallback(async (id: number) => {
     setLoading(true);
     try {
@@ -92,12 +88,13 @@ export const useProducts = (
       setError(null);
     } catch (err) {
       handleError(err, 'Failed to fetch product by ID');
-      setSelectedProduct(null);
+      setSelectedProduct(null);  // Ensure selectedProduct is null on error
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Fetch product details by slug
   const fetchProductBySlug = useCallback(async (slug: string) => {
     setLoading(true);
     try {
@@ -106,21 +103,22 @@ export const useProducts = (
       setError(null);
     } catch (err) {
       handleError(err, 'Failed to fetch product by slug');
-      setSelectedProduct(null);
+      setSelectedProduct(null);  // Ensure selectedProduct is null on error
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Create a new product
   const createNewProduct = useCallback(
     async (productData: FormData) => {
       setLoading(true);
       try {
         const response = await createProduct(productData);
-        setProducts((prev) => [response.data, ...prev]);
+        setProducts((prev) => [response.data, ...prev]); // Add new product to the list
         const newTotal = totalItems + 1;
         setTotalItems(newTotal);
-        setTotalPages(Math.ceil(newTotal / pageSize));
+        setTotalPages(Math.ceil(newTotal / initialPageSize)); // Update total pages
         setError(null);
         return response.data;
       } catch (err) {
@@ -130,9 +128,10 @@ export const useProducts = (
         setLoading(false);
       }
     },
-    [totalItems, pageSize]
+    [totalItems, initialPageSize]
   );
 
+  // Update an existing product
   const updateExistingProduct = useCallback(
     async (id: number, productData: FormData) => {
       setLoading(true);
@@ -141,7 +140,7 @@ export const useProducts = (
         setProducts((prev) =>
           prev.map((product) => (product.id === id ? response.data : product))
         );
-        setSelectedProduct((prev) => (prev?.id === id ? response.data : prev));
+        setSelectedProduct((prev) => (prev?.id === id ? response.data : prev));  // Update selected product
         setError(null);
         return response.data;
       } catch (err) {
@@ -154,6 +153,7 @@ export const useProducts = (
     []
   );
 
+  // Delete an existing product
   const deleteExistingProduct = useCallback(
     async (id: number) => {
       setLoading(true);
@@ -163,9 +163,9 @@ export const useProducts = (
         const newTotal = totalItems - 1;
         setProducts(updatedProducts);
         setTotalItems(newTotal);
-        setTotalPages(Math.ceil(newTotal / pageSize));
+        setTotalPages(Math.ceil(newTotal / initialPageSize));
         if (updatedProducts.length === 0 && page > 1) {
-          setPage(page - 1);
+          setPage(page - 1); // Adjust page if needed
         }
         setError(null);
       } catch (err) {
@@ -175,14 +175,15 @@ export const useProducts = (
         setLoading(false);
       }
     },
-    [products, totalItems, page, pageSize]
+    [products, totalItems, page, initialPageSize]
   );
 
+  // Filter products based on filters
   const filterProductsList = useCallback(
     async (filters: Record<string, string>) => {
       setLoading(true);
       try {
-        const response = await filterProducts(filters, page - 1, pageSize);
+        const response = await filterProducts(filters, page - 1, initialPageSize);
         handleResponsePagination(response);
       } catch (err) {
         handleError(err, 'Failed to filter products');
@@ -190,8 +191,17 @@ export const useProducts = (
         setLoading(false);
       }
     },
-    [page, pageSize]
+    [page, initialPageSize, handleResponsePagination]
   );
+
+  // Effect to fetch products or search results when dependencies change
+  useEffect(() => {
+    if (searchQuery) {
+      searchProducts(searchQuery);
+    } else {
+      fetchProducts();
+    }
+  }, [searchQuery, fetchProducts, searchProducts]);
 
   return {
     products,
@@ -199,11 +209,11 @@ export const useProducts = (
     loading,
     error,
     page,
-    pageSize,
     totalPages,
     totalItems,
     setPage,
-    setPageSize,
+    searchQuery,
+    setSearchQuery,
     searchProducts,
     fetchProducts,
     fetchProductById,

@@ -1,54 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SearchIcon, XIcon } from 'lucide-react';
 import { useProducts } from '@/hooks/products/useProducts';
 import { ProductResponse } from 'types/product/product-response.types';
+import Image from 'next/image';
 
 const SearchBar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
-  const {
-    products,
-    loading,
-    searchProducts,
-  } = useProducts();
+  const { products, loading, searchProducts } = useProducts();
 
-  // Load sản phẩm khi mở search
+  // Tối ưu hóa useEffect để chỉ chạy khi isSearchOpen thay đổi
   useEffect(() => {
     if (isSearchOpen) {
       searchProducts(''); // Load tất cả sản phẩm khi mở search
     }
-  }, [isSearchOpen]);
+  }, [isSearchOpen, searchProducts]);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchTerm(query);
-    searchProducts(query);
-  };
+  // Tối ưu hóa các hàm bằng useCallback
+  const handleSearch = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const query = e.target.value;
+      setSearchTerm(query);
+      searchProducts(query);
+    },
+    [searchProducts] // Chỉ khi searchProducts thay đổi mới chạy lại
+  );
 
-  const handleSelectSearch = (term: string) => {
-    setSearchTerm(term);
-    searchProducts(term);
-    setIsSearchOpen(false);
+  const handleSelectSearch = useCallback(
+    (term: string) => {
+      setSearchTerm(term);
+      searchProducts(term);
+      setIsSearchOpen(false);
 
-    if (!recentSearches.includes(term)) {
-      setRecentSearches([term, ...recentSearches.slice(0, 4)]);
-    }
-  };
+      if (!recentSearches.includes(term)) {
+        setRecentSearches([term, ...recentSearches.slice(0, 4)]);
+      }
+    },
+    [recentSearches, searchProducts]
+  );
 
-  const handleOpenSearch = () => {
+  const handleOpenSearch = useCallback(() => {
     setIsSearchOpen(true);
-    searchProducts(''); // Load ngay khi mở search
-  };
+    searchProducts(''); // Load sản phẩm khi mở search
+  }, [searchProducts]);
 
-  const handleCloseSearch = () => {
+  const handleCloseSearch = useCallback(() => {
     setIsSearchOpen(false);
     if (searchTerm.trim() && !recentSearches.includes(searchTerm)) {
       setRecentSearches([searchTerm, ...recentSearches.slice(0, 4)]);
     }
     setSearchTerm('');
-  };
+  }, [recentSearches, searchTerm]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -64,7 +68,7 @@ const SearchBar = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isSearchOpen, searchTerm]);
+  }, [isSearchOpen, handleCloseSearch]);
 
   const renderSearchResults = () => {
     if (loading) {
@@ -81,13 +85,12 @@ const SearchBar = () => {
         className="flex items-center p-3 hover:bg-gray-100 cursor-pointer transition"
         onClick={() => handleSelectSearch(item.name)}
       >
-        <img
+        <Image
           src={item.mainImageUrl}
           alt={item.name}
+          width={40}
+          height={40}
           className="w-10 h-10 rounded-md object-cover mr-3"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = '/placeholder-product.png';
-          }}
         />
         <p className="text-sm">{item.name}</p>
       </div>
@@ -96,7 +99,7 @@ const SearchBar = () => {
 
   return (
     <>
-      {/* Mobile Search Button - Đã sửa thành handleOpenSearch */}
+      {/* Mobile Search Button */}
       <button
         onClick={handleOpenSearch}
         className="md:hidden p-2 hover:bg-gray-100 rounded-full transition"
@@ -113,12 +116,12 @@ const SearchBar = () => {
           className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black transition"
           value={searchTerm}
           onChange={handleSearch}
-          onFocus={handleOpenSearch} // Sửa thành handleOpenSearch
+          onFocus={handleOpenSearch}
         />
         <SearchIcon
           className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
           size={18}
-          onClick={handleOpenSearch} // Thêm sự kiện click để load sản phẩm
+          onClick={handleOpenSearch}
           style={{ cursor: 'pointer' }}
         />
 
