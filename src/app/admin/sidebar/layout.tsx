@@ -1,3 +1,4 @@
+"use client"
 // src/app/admin/sidebar/layout.tsx
 import { useState, ReactNode } from "react";
 import Sidebar from "./page";
