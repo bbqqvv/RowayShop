@@ -3,12 +3,9 @@
 import { ReactNode, useState } from "react";
 import Sidebar from "./page";
 import Header from "./components/Header";
+import { LayoutProps } from "./components/types";
 
-// Define the LayoutProps interface separately
-export interface LayoutProps {
-  children: ReactNode;
-  title?: string;
-}
+
 
 // Define the component and use the LayoutProps for typing
 const AdminLayout = ({ children, title }: LayoutProps) => {
