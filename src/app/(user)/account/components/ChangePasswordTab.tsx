@@ -55,7 +55,7 @@ export default function ChangePasswordTab() {
       } else {
         toast.error("Mật khẩu cũ không đúng hoặc có lỗi xảy ra!", { position: "top-right" });
       }
-    } catch (error) {
+    } catch {
       toast.error("Lỗi hệ thống. Vui lòng thử lại!", { position: "top-right" });
     }
   };

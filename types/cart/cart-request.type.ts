@@ -5,7 +5,7 @@ export interface CartRequest {
 
 export interface CartItemRequest {
     productId: number;
-    quantity: number;
+    quantity?: number;
     sizeName: string;
     color: string;
 }

@@ -75,7 +75,7 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
           Add Variant
         </button>
       </div>
-      
+
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -169,18 +169,15 @@ const VariantsTable: React.FC<VariantsTableProps> = ({
                           const isSelected = variant.sizes.some(
                             (selectedSize) => selectedSize.sizeName === size.id.toString()
                           );
-                          const sizeData = variant.sizes.find(s => s.sizeName === size.id.toString());
-                          
                           return (
                             <div key={size.id} className="relative">
                               <button
                                 type="button"
                                 onClick={() => handleSizeChange(index, size.id)}
-                                className={`px-3 py-1 rounded-md text-sm font-medium flex items-center ${
-                                  isSelected 
-                                    ? "bg-blue-100 text-blue-800 border border-blue-200"
-                                    : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
-                                } transition duration-150 ease-in-out`}
+                                className={`px-3 py-1 rounded-md text-sm font-medium flex items-center ${isSelected
+                                  ? "bg-blue-100 text-blue-800 border border-blue-200"
+                                  : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                                  } transition duration-150 ease-in-out`}
                               >
                                 {size.name}
                                 {isSelected && (

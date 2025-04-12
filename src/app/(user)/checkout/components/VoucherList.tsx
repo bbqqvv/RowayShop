@@ -5,6 +5,7 @@ import { useDiscounts } from "@/hooks/discount/useDiscount";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { applyVoucher } from "@/redux/slices/voucherSlice";
+import { Voucher } from "types/type";
 
 const VoucherList: React.FC = () => {
   const dispatch = useDispatch();
@@ -18,7 +19,7 @@ const VoucherList: React.FC = () => {
 
   useEffect(() => {
     fetchUserDiscountCodes();
-  }, []);
+  },  []);
 
   const handleSaveDiscount = async (code: string) => {
     setMessage("");
@@ -26,12 +27,12 @@ const VoucherList: React.FC = () => {
       await saveDiscountCode(code);
       await fetchUserDiscountCodes(); // Cập nhật danh sách mã của user
       setMessage("Mã giảm giá đã được lưu!");
-    } catch (err) {
+    } catch {
       setMessage("Mã giảm giá không hợp lệ.");
     }
   };
 
-  const handleSelectVoucher = (voucher: any) => {
+  const handleSelectVoucher = (voucher: Voucher) => {
     dispatch(applyVoucher(voucher)); // ✅ Lưu voucher vào Redux
   };
 

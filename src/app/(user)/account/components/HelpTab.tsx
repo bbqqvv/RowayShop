@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function HelpTab() {
-    const { supportItems, loading, error } = useSupportItems();  // Lấy dữ liệu từ hook
+    const { supportItems, loading } = useSupportItems();  // Lấy dữ liệu từ hook
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-6">

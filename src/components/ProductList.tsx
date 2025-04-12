@@ -5,10 +5,9 @@ import Link from "next/link";
 import { useProducts } from "@/hooks/products/useProducts";
 import FavouriteButton from "./shared/FavouriteButton";
 import Image from "next/image";
-import { ShoppingCart } from "lucide-react";
-import ProductHighlight from "./ProductHighlight";
 import ProductSkeleton from "./products/ProductSkeleton";
 import { ProductResponse } from "types/product/product-response.types";
+import { useRecentlyViewedProducts } from "@/hooks/products/useRecentlyViewedProducts";
 
 // Constants
 const ITEMS_PER_PAGE = 8;
@@ -17,42 +16,33 @@ const DEFAULT_IMAGE_URL = "images/default-image.png";
 const ProductList = () => {
   const {
     products,
-    loading,
-    error,
     page,
     totalPages,
     fetchProducts,
     setPage,
   } = useProducts(undefined, 1, ITEMS_PER_PAGE);
-  
+  const { markAsViewed } = useRecentlyViewedProducts();
   const [selectedImages, setSelectedImages] = useState<Record<number, string>>({});
-  const [filterType, setFilterType] = useState("all");
+  const [filterType] = useState("all");
   const [localLoading, setLocalLoading] = useState(false);
 
   // Fetch products when page changes
   useEffect(() => {
     const loadProducts = async () => {
-      if (page === 1 && products.length === 0) {
-        // Initial load
-        setLocalLoading(true);
-        await fetchProducts();
-        setLocalLoading(false);
-      } else if (page > 1) {
-        // Subsequent page loads
-        setLocalLoading(true);
-        await fetchProducts();
-        setLocalLoading(false);
-      }
+      setLocalLoading(true);
+      await fetchProducts();
+      setLocalLoading(false);
     };
-    
-    loadProducts();
-  }, [page, fetchProducts]);
+
+    if (page === 1 && products.length === 0 || page > 1) {
+      loadProducts();
+    }
+  }, [page, fetchProducts, products.length]);  // Thêm `products.length` vào dependency array
 
   const handleImageChange = useCallback((productId: number, imageUrl: string) => {
     setSelectedImages((prev) => ({ ...prev, [productId]: imageUrl }));
   }, []);
 
-  // Memoize filtered products
   const filteredProducts = useMemo(() => {
     return products.filter(({ salePercentage, featured }) => {
       if (filterType === "featured") return featured;
@@ -61,7 +51,6 @@ const ProductList = () => {
     });
   }, [products, filterType]);
 
-  // Load more products handler
   const handleLoadMore = useCallback(() => {
     if (page < totalPages) {
       setPage(page + 1);
@@ -73,6 +62,10 @@ const ProductList = () => {
     const productImage = selectedImages[id] || mainImageUrl || DEFAULT_IMAGE_URL;
     const price = variants[0]?.sizes[0]?.price ?? 0;
     const salePrice = salePercentage > 0 ? price * ((100 - salePercentage) / 100) : price;
+
+    const handleClick = () => {
+      markAsViewed(id);
+    };
 
     return (
       <div className="bg-white p-4 rounded-lg hover:bg-gray-50 relative overflow-hidden">
@@ -86,7 +79,7 @@ const ProductList = () => {
           <FavouriteButton product={product} />
         </div>
 
-        <Link href={`/products/${slug}`} className="block">
+        <Link href={`/products/${slug}`} className="block" onClick={handleClick}>
           <div className="relative w-full h-64">
             <Image
               src={productImage}
@@ -100,7 +93,7 @@ const ProductList = () => {
         </Link>
 
         <div className="mt-4">
-          <Link href={`/products/${slug}`} className="font-medium text-lg block">
+          <Link href={`/products/${slug}`} className="font-medium text-lg block" onClick={handleClick}>
             {name}
           </Link>
 
@@ -109,8 +102,7 @@ const ProductList = () => {
               {variants.map(({ color, imageUrl }, index) => (
                 <button
                   key={index}
-                  className={`w-7 h-7 rounded-full border-2 transition-transform ${productImage === imageUrl ? "border-black scale-110 shadow-md" : "border-gray-300"
-                    }`}
+                  className={`w-7 h-7 rounded-full border-2 transition-transform ${productImage === imageUrl ? "border-black scale-110 shadow-md" : "border-gray-300"}`}
                   style={{ backgroundColor: color.toLowerCase() }}
                   onClick={() => handleImageChange(id, imageUrl)}
                   title={color}
@@ -141,13 +133,6 @@ const ProductList = () => {
                 </span>
               )}
             </div>
-
-            <button
-              className="bg-gray-200 text-black p-2 rounded-full hover:bg-gray-300 transition"
-              aria-label="Add to cart"
-            >
-              <ShoppingCart size={20} />
-            </button>
           </div>
         </div>
       </div>
@@ -156,21 +141,13 @@ const ProductList = () => {
 
   return (
     <>
-      <ProductHighlight setFilterType={setFilterType} />
-
       <div className="text-center mb-6">
-        <h2 className="text-3xl font-semibold text-gray-900">Sản Phẩm Nổi Bật</h2>
+        <h2 className="text-3xl font-semibold text-gray-900">Sản Phẩm</h2>
       </div>
 
       <div className="container mx-auto px-4">
-        {error && (
-          <div className="text-center text-red-500 mb-4">
-            {error}
-          </div>
-        )}
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-16">
-          {(loading || localLoading) && products.length === 0 ? (
+          {products.length === 0 ? (
             Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
               <ProductSkeleton key={`skeleton-${index}`} />
             ))

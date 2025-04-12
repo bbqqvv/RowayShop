@@ -1,10 +1,10 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { FiChevronLeft, FiTruck, FiRefreshCcw, FiStar, FiCalendar, FiCreditCard, FiUser, FiMapPin, FiPhone, FiPackage, FiCheckCircle, FiShoppingBag } from "react-icons/fi";
+import { FiChevronLeft, FiTruck, FiRefreshCcw, FiStar, FiCalendar, FiCreditCard, FiCheckCircle, FiShoppingBag } from "react-icons/fi";
 import React from "react";
 import { motion } from "framer-motion";
-
+import Image from "next/image";
 const Page = () => {
   const { orderCode } = useParams();
   const router = useRouter();
@@ -149,7 +149,7 @@ const Page = () => {
             <div className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-gradient-to-b from-gray-200 via-gray-200 to-gray-200"></div>
 
             <div className="space-y-6">
-              {statusSteps.map((step, index) => (
+              {statusSteps.map((step) => (
                 <div key={step.id} className="relative pl-10">
                   {/* Dot indicator */}
                   <div className={`
@@ -294,10 +294,11 @@ const Page = () => {
                 >
                   <div className="flex gap-5">
                     <div className="relative flex-shrink-0">
-                      <img
+                      <Image
                         src={item.mainImageUrl}
                         alt={item.productName}
-                        className="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm"
+                        fill
+                        className="object-cover rounded-lg border border-gray-200 shadow-sm"
                       />
                       {index === 0 && (
                         <div className="absolute top-2 left-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs px-2 py-1 rounded shadow-sm">

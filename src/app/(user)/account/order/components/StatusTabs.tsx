@@ -5,9 +5,11 @@ const statusTabs = [
   { id: "all", label: "Tất cả" },
   { id: "pending", label: "Chờ xác nhận" },
   { id: "confirmed", label: "Đã xác nhận" },
-  { id: "shipping", label: "Đang vận chuyển" },
+  { id: "shipped", label: "Đang vận chuyển" },
   { id: "delivered", label: "Đã giao hàng" },
   { id: "cancelled", label: "Đã huỷ" },
+  { id: "refunded", label: "Đã hoàn tiền" },
+
 ];
 
 interface StatusTabsProps {

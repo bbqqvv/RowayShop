@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useFilterProducts } from "@/hooks/filter/useFilter";  // Hook đã chỉnh sửa
+import { useFilterProducts } from "@/hooks/filter/useFilter";
 import ProductCard from "@/app/(pages)/categories/[slug]/components/ProductCard";
 import { ChevronDownIcon, GridIcon, ListIcon } from "lucide-react";
 import Pagination from "@/components/shared/Pagination";
@@ -11,40 +13,37 @@ import { setAppliedFilters } from "@/redux/slices/filterSlice";
 const ProductListFilter: React.FC = () => {
     const dispatch = useDispatch();
     const appliedFilters = useSelector((state: RootState) => state.filter.appliedFilters);
-    const [activeView, setActiveView] = useState("grid");
+    const [activeView, setActiveView] = useState<"grid" | "list">("grid");
     const [sortBy, setSortBy] = useState("newest");
     const [page, setPage] = useState(0);
 
-    // Lấy sản phẩm dựa trên bộ lọc và phân trang
     const { products, loading, error } = useFilterProducts(appliedFilters, page);
-    console.log("ProductFilter", products);
 
-    // Hàm xử lý thay đổi bộ lọc
-    const handleApplyFilters = () => {
-        dispatch(setAppliedFilters(appliedFilters));  // Cập nhật bộ lọc vào Redux
-    };
+    // Debug logs (optional)
+    // if (process.env.NODE_ENV === "development") {
+    //   console.log("ProductFilter", products);
+    // }
+
+    // Trigger Redux filter update when page/filter changes
+    useEffect(() => {
+        dispatch(setAppliedFilters(appliedFilters));
+    }, [dispatch, appliedFilters]);
 
     const handleAddToCart = (productId: number) => {
         console.log(`Product with ID: ${productId} added to cart`);
     };
 
     const handlePageChange = (newPage: number) => {
-        setPage(newPage);  // Cập nhật trang mới
+        setPage(newPage);
     };
 
-    // Chỉ gọi API khi có sự thay đổi về bộ lọc hoặc trang
-    useEffect(() => {
-        // Cập nhật bộ lọc vào Redux mỗi khi bộ lọc thay đổi
-        handleApplyFilters();
-    }, [appliedFilters, page]);  // Chỉ khi filters hoặc page thay đổi
+    const totalPages =
+        products?.data?.totalPages ? Math.ceil(products.data.totalPages / 9) : 0;
 
-    if (loading) return <p>Loading products...</p>;
-    if (error) return <p>{`Có lỗi xảy ra: ${error}`}</p>;
+    const productItems = products?.data?.items || [];
 
-    const totalPages = products?.data?.totalPages ? Math.ceil(products.data.totalPages / 9) : 0;
-
-    const productItems = products?.data.items || [];
-    console.log("ProductItem:",productItems)
+    if (loading) return <p className="text-center py-10">Đang tải sản phẩm...</p>;
+    if (error) return <p className="text-center text-red-500 py-10">{`Có lỗi xảy ra: ${error}`}</p>;
 
     return (
         <section className="py-10">
@@ -85,25 +84,34 @@ const ProductListFilter: React.FC = () => {
                 </div>
             </div>
 
-            {/* Hiển thị sản phẩm theo dạng grid hoặc list */}
             <div
-                className={`mx-auto ${activeView === "grid" ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" : "grid grid-cols-1 gap-6"}`}
+                className={`mx-auto ${activeView === "grid"
+                    ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                    : "grid grid-cols-1 gap-6"
+                    }`}
             >
                 {productItems.length > 0 ? (
                     productItems.map((product: ProductResponse) => (
-                        <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            onAddToCart={handleAddToCart}
+                        />
                     ))
                 ) : (
-                    <p>Không có sản phẩm nào.</p>
+                    <p className="col-span-full text-center text-gray-500">
+                        Không có sản phẩm nào.
+                    </p>
                 )}
             </div>
 
-            {/* Phân trang */}
-            <Pagination
-                currentPage={page}
-                totalPages={totalPages} // Cập nhật tổng số trang
-                onPageChange={handlePageChange}
-            />
+            {totalPages > 1 && (
+                <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
+            )}
         </section>
     );
 };

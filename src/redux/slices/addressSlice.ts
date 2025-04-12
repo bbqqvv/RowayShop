@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AddressRequest } from "types/address/address-request.type";
 import { AddressResponse } from "types/address/address-response.type";
 
 interface AddressState {

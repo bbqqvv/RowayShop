@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setSelectedAddress } from "@/redux/slices/addressSlice";
 import { AddressSkeleton } from "@/components/address/AddressSkeleton";
+import { AddressResponse } from "types/address/address-response.type";
 
 
 const AddressSelection = () => {
@@ -13,7 +14,7 @@ const AddressSelection = () => {
   const selectedAddress = useSelector((state: RootState) => state.address.selectedAddress);
   const { addresses, loading, error } = useAddresses();
 
-  const handleSelectAddress = (address: any) => {
+  const handleSelectAddress = (address: AddressResponse) => {
     dispatch(setSelectedAddress(address));
   };
 

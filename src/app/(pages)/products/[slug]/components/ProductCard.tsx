@@ -10,6 +10,7 @@ import LoginModal from "@/components/features/LoginModal";
 import ProductSecondaryImages from "./ProductSecondaryImages";
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  console.log("Product", product)
   const { addItemToCart, loading } = useCart();
   const { token } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);

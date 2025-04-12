@@ -16,6 +16,7 @@ export interface ProductResponse {
   descriptionImageUrls: string[];
   tags?: string[];
   variants: VariantResponse[];
+  reviewCount: number;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -15,36 +15,36 @@ interface FavouriteButtonProps {
 }
 
 const FavouriteButton: React.FC<FavouriteButtonProps> = ({ product }) => {
-  const { token } = useAuth(); 
+  const { token } = useAuth();
   const dispatch = useDispatch();
   const { id: productId } = product;
 
+  // Lấy danh sách sản phẩm yêu thích từ Redux
   const favourites = useSelector((state: RootState) => state.favourites.favourites);
   const { addNewFavourite, removeFavourite: removeFavouriteItem } = useFavourite();
 
+  // Kiểm tra nếu sản phẩm có trong danh sách yêu thích từ Redux
   const isFavourite = useMemo(() => {
     return favourites.some((fav) => fav.id === productId);
   }, [favourites, productId]);
 
   const handleToggle = useCallback(async () => {
     if (!token) {
-      toast.error("Bạn chưa đăng nhập :("); 
-      return; 
+      toast.error("Bạn chưa đăng nhập :(");
+      return;
     }
 
     try {
       if (isFavourite) {
-        await removeFavouriteItem(productId);
-        dispatch(removeFav(productId)); // Cập nhật Redux khi xóa
-        toast.success("Đã xóa khỏi yêu thích!");
+        await removeFavouriteItem(productId);  // Xóa khỏi yêu thích
+        dispatch(removeFav(productId));         // Cập nhật Redux khi xóa
       } else {
-        const newFavourite = await addNewFavourite(productId);
+        const newFavourite = await addNewFavourite(productId);  // Thêm vào yêu thích
         if (newFavourite) {
-          dispatch(addFav(newFavourite)); // Cập nhật Redux khi thêm
-          toast.success("Đã thêm vào yêu thích!"); 
+          dispatch(addFav(newFavourite));  // Cập nhật Redux khi thêm
         }
       }
-    } catch (error) {
+    } catch {
       toast.error("Đã xảy ra lỗi khi xử lý yêu thích!");
     }
   }, [isFavourite, dispatch, productId, addNewFavourite, removeFavouriteItem, token]);

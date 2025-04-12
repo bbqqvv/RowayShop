@@ -1,36 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { SearchIcon, XIcon } from 'lucide-react';
-
-const mockResults = [
-  { id: 1, name: "Giày Sneaker Nam", image: "/images/default-image.png" },
-  { id: 2, name: "Áo Hoodie Unisex", image: "/images/default-image.png" },
-  { id: 3, name: "Túi Đeo Chéo Thời Trang", image: "/images/default-image.png" },
-];
+import { useProducts } from '@/hooks/products/useProducts';
+import { ProductResponse } from 'types/product/product-response.types';
 
 const SearchBar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
+  const {
+    products,
+    loading,
+    searchProducts,
+  } = useProducts();
+
+  // Load sản phẩm khi mở search
   useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setSearchResults([]);
-    } else {
-      const filteredResults = mockResults.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setSearchResults(filteredResults);
+    if (isSearchOpen) {
+      searchProducts(''); // Load tất cả sản phẩm khi mở search
     }
-  }, [searchTerm]);
+  }, [isSearchOpen]);
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchTerm(query);
+    searchProducts(query);
   };
 
-  const handleSelectSearch = (term) => {
+  const handleSelectSearch = (term: string) => {
     setSearchTerm(term);
+    searchProducts(term);
     setIsSearchOpen(false);
+
+    if (!recentSearches.includes(term)) {
+      setRecentSearches([term, ...recentSearches.slice(0, 4)]);
+    }
+  };
+
+  const handleOpenSearch = () => {
+    setIsSearchOpen(true);
+    searchProducts(''); // Load ngay khi mở search
   };
 
   const handleCloseSearch = () => {
@@ -41,12 +50,62 @@ const SearchBar = () => {
     setSearchTerm('');
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCloseSearch();
+      }
+    };
+
+    if (isSearchOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSearchOpen, searchTerm]);
+
+  const renderSearchResults = () => {
+    if (loading) {
+      return <p className="text-center text-gray-500 py-2">Đang tải...</p>;
+    }
+
+    if (products.length === 0) {
+      return <p className="text-center text-gray-500 py-2">Không tìm thấy sản phẩm nào</p>;
+    }
+
+    return products.map((item: ProductResponse) => (
+      <div
+        key={item.id}
+        className="flex items-center p-3 hover:bg-gray-100 cursor-pointer transition"
+        onClick={() => handleSelectSearch(item.name)}
+      >
+        <img
+          src={item.mainImageUrl}
+          alt={item.name}
+          className="w-10 h-10 rounded-md object-cover mr-3"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/placeholder-product.png';
+          }}
+        />
+        <p className="text-sm">{item.name}</p>
+      </div>
+    ));
+  };
+
   return (
     <>
-      <button onClick={() => setIsSearchOpen(true)} className="md:hidden p-2 hover:bg-gray-100 rounded-full transition">
+      {/* Mobile Search Button - Đã sửa thành handleOpenSearch */}
+      <button
+        onClick={handleOpenSearch}
+        className="md:hidden p-2 hover:bg-gray-100 rounded-full transition"
+        aria-label="Open search"
+      >
         <SearchIcon size={20} className="text-gray-700" />
       </button>
 
+      {/* Desktop Search */}
       <div className="hidden md:flex flex-1 max-w-xl mx-8 relative">
         <input
           type="text"
@@ -54,26 +113,23 @@ const SearchBar = () => {
           className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black transition"
           value={searchTerm}
           onChange={handleSearch}
-          onFocus={() => setIsSearchOpen(true)}
+          onFocus={handleOpenSearch} // Sửa thành handleOpenSearch
         />
-        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+        <SearchIcon
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          size={18}
+          onClick={handleOpenSearch} // Thêm sự kiện click để load sản phẩm
+          style={{ cursor: 'pointer' }}
+        />
 
         {isSearchOpen && (
           <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-lg shadow-md mt-2 z-50 overflow-hidden">
-            {searchResults.length > 0 ? (
-              searchResults.map((item) => (
-                <div key={item.id} className="flex items-center p-3 hover:bg-gray-100 cursor-pointer transition">
-                  <img src={item.image} alt={item.name} className="w-10 h-10 rounded-md object-cover mr-3" />
-                  <p className="text-sm">{item.name}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500 py-2">Không tìm thấy sản phẩm nào</p>
-            )}
+            {renderSearchResults()}
           </div>
         )}
       </div>
 
+      {/* Mobile Search Modal */}
       {isSearchOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-50 flex flex-col">
           <div className="container mx-auto px-4 py-4 bg-white shadow-lg flex items-center">
@@ -85,25 +141,21 @@ const SearchBar = () => {
                 autoFocus
                 value={searchTerm}
                 onChange={handleSearch}
+                aria-label="Search products"
               />
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={24} />
             </div>
-            <button onClick={handleCloseSearch} className="ml-6 p-2 hover:bg-gray-100 rounded-full transition">
+            <button
+              onClick={handleCloseSearch}
+              className="ml-6 p-2 hover:bg-gray-100 rounded-full transition"
+              aria-label="Close search"
+            >
               <XIcon size={24} className="text-gray-700" />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 bg-white shadow-md">
-            {searchResults.length > 0 ? (
-              searchResults.map((item) => (
-                <div key={item.id} className="flex items-center p-3 border-b border-gray-200 hover:bg-gray-100 cursor-pointer" onClick={() => handleSelectSearch(item.name)}>
-                  <img src={item.image} alt={item.name} className="w-12 h-12 rounded-md object-cover mr-4" />
-                  <p className="text-lg">{item.name}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500">Không tìm thấy sản phẩm nào</p>
-            )}
+            {renderSearchResults()}
           </div>
         </div>
       )}

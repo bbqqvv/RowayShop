@@ -5,7 +5,6 @@ import {
   MapPinIcon,
   FacebookIcon,
   InstagramIcon,
-  TwitterIcon,
   YoutubeIcon,
 } from 'lucide-react'
 const Footer = () => {

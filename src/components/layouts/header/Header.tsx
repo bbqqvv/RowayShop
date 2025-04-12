@@ -116,7 +116,7 @@ const Header = () => {
                       await logout();
                       await toast.success("Đăng xuất thành công!");
                       router.replace("/login");
-                    } catch (error) {
+                    } catch {
                       toast.error("Lỗi đăng xuất. Vui lòng thử lại.");
                     }
                   }}

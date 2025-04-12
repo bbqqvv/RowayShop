@@ -1,19 +1,33 @@
-// hooks/users/useFavourite.ts
-
 import { addFavourite, getFavourites, removeFavourite } from "@/services/favouriteService";
 import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FavouriteResponse } from "types/favourite/favourite-response.type";
 import { addFav, removeFav, setFav } from "@/redux/slices/favouriteSlice"; // Redux actions
 
+// Định nghĩa kiểu cho dữ liệu phân trang
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  totalElements: number;
+  pageSize: number;
+}
+
+// Định nghĩa kiểu cho trạng thái Redux (Giả sử RootState là kiểu toàn cục của trạng thái Redux)
+interface RootState {
+  favourites: {
+    favourites: FavouriteResponse[]; // Kiểu dữ liệu của yêu thích trong Redux
+  };
+}
+
 export const useFavourite = () => {
   const dispatch = useDispatch();
-  const favouritesFromRedux = useSelector((state: any) => state.favourites.favourites); // Lấy dữ liệu yêu thích từ Redux
+  // Thay 'any' bằng kiểu RootState
+  const favouritesFromRedux = useSelector((state: RootState) => state.favourites.favourites);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState<Pagination>({
     currentPage: 0,
     totalPages: 0,
     totalElements: 0,
@@ -45,27 +59,33 @@ export const useFavourite = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    fetchFavourites(); 
+    fetchFavourites();
   }, [fetchFavourites]);
 
   const addNewFavourite = useCallback(async (productId: number): Promise<FavouriteResponse | undefined> => {
+    setLoading(true);
     try {
       const newFavourite = await addFavourite(productId);
-      dispatch(addFav(newFavourite)); 
+      dispatch(addFav(newFavourite));
       return newFavourite;
     } catch (err) {
       console.error("❌ Lỗi khi thêm vào danh sách yêu thích:", err);
       return undefined;
+    } finally {
+      setLoading(false);
     }
   }, [dispatch]);
 
   /** ❌ Xóa sản phẩm khỏi danh sách yêu thích */
   const removeFavouriteItem = useCallback(async (productId: number) => {
+    setLoading(true);
     try {
       await removeFavourite(productId);
       dispatch(removeFav(productId)); // Cập nhật Redux
     } catch (err) {
       console.error("❌ Lỗi khi xóa sản phẩm khỏi danh sách yêu thích:", err);
+    } finally {
+      setLoading(false);
     }
   }, [dispatch]);
 

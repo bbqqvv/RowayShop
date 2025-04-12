@@ -1,5 +1,4 @@
-"use client";
-
+// redux/store.ts
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
@@ -10,11 +9,17 @@ import voucherReducer from "./slices/voucherSlice";
 import paymentReducer from "./slices/paymentSlice";
 import favouriteReducer from "./slices/favouriteSlice";  
 import filterReducer from "./slices/filterSlice";  
+import viewedProductsReducer from "./slices/viewedProductsSlice";  
 
-// Persist configs
 const cartPersistConfig = {
   key: "cart",
   storage,
+};
+
+const favouritePersistConfig = {
+  key: "favourites",
+  storage,
+  whitelist: ["favourites"],  
 };
 
 // Combine reducers
@@ -23,9 +28,9 @@ const rootReducer = combineReducers({
   address: addressReducer,
   voucher: voucherReducer,
   payment: paymentReducer,
-  favourites: favouriteReducer, 
+  favourites: persistReducer(favouritePersistConfig, favouriteReducer),  // Persist favourites
   filter: filterReducer,
-
+  viewedProducts: viewedProductsReducer,
 });
 
 // Store setup

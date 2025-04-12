@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Button, Spinner } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import { AiOutlineUpload } from "react-icons/ai";
 import { useCategories } from "@/hooks/categories/useCategories";
 import ImageModal from "@/components/features/ImageModal";
@@ -14,10 +14,10 @@ interface CategoryFormProps {
   onCancel?: () => void;
 }
 
-export default function CategoryForm({ 
-  selectedCategory, 
-  onSuccess, 
-  onCancel 
+export default function CategoryForm({
+  selectedCategory,
+  onSuccess,
+  onCancel
 }: CategoryFormProps) {
   // Form state
   const [formData, setFormData] = useState({
@@ -26,23 +26,22 @@ export default function CategoryForm({
     sizes: [] as string[],
     image: null as File | null,
   });
-  
+
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [status, setStatus] = useState<{
     message: string;
     type: 'success' | 'error';
   } | null>(null);
-  
+
   const [modals, setModals] = useState({
     size: false,
     image: false,
   });
 
-  const { 
-    createNewCategory, 
-    updateExistingCategory, 
-    loading, 
-    error 
+  const {
+    createNewCategory,
+    updateExistingCategory,
+    loading,
   } = useCategories();
 
   // Initialize form when selectedCategory changes
@@ -61,10 +60,10 @@ export default function CategoryForm({
   }, [selectedCategory]);
 
   // Handle form input changes
-  const handleInputChange = (field: keyof typeof formData) => 
+  const handleInputChange = (field: keyof typeof formData) =>
     (value: string | string[] | File | null) => {
       setFormData(prev => ({ ...prev, [field]: value }));
-      
+
       // Clear status when user makes changes
       if (status) setStatus(null);
     };
@@ -111,7 +110,7 @@ export default function CategoryForm({
         resetForm();
       }
       onSuccess?.();
-    } catch (err) {
+    } catch {
       setStatus({
         message: "An error occurred",
         type: 'error'
@@ -121,11 +120,11 @@ export default function CategoryForm({
 
   // Reset form to initial state
   const resetForm = () => {
-    setFormData({ 
-      name: "", 
-      slug: "", 
-      sizes: [], 
-      image: null 
+    setFormData({
+      name: "",
+      slug: "",
+      sizes: [],
+      image: null
     });
     setImagePreview(null);
     setStatus(null);
@@ -133,9 +132,9 @@ export default function CategoryForm({
 
   // Toggle modal visibility
   const toggleModal = (modal: keyof typeof modals) => () => {
-    setModals(prev => ({ 
-      ...prev, 
-      [modal]: !prev[modal] 
+    setModals(prev => ({
+      ...prev,
+      [modal]: !prev[modal]
     }));
   };
 
@@ -220,8 +219,8 @@ export default function CategoryForm({
             onClick={toggleModal('size')}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
-            {formData.sizes.length > 0 
-              ? `Manage Sizes (${formData.sizes.length})` 
+            {formData.sizes.length > 0
+              ? `Manage Sizes (${formData.sizes.length})`
               : "Add Sizes"}
           </button>
           {formData.sizes.length > 0 && (
@@ -264,9 +263,8 @@ export default function CategoryForm({
 
       {/* Status Message */}
       {status && (
-        <div className={`mt-4 text-sm font-medium ${
-          status.type === 'error' ? 'text-red-500' : 'text-green-500'
-        }`}>
+        <div className={`mt-4 text-sm font-medium ${status.type === 'error' ? 'text-red-500' : 'text-green-500'
+          }`}>
           {status.message}
         </div>
       )}

@@ -24,12 +24,12 @@ export const useUser = (id?: number) => {
     setLoading(true);
     try {
       const data: PaginatedResponse<UserResponse> = await userService.getAllUsers(page, pageSize);
-      setUsers(data.data.items);
+      setUsers(data.items);
       setPagination({
-        page: data.data.currentPage,
-        pageSize: data.data.pageSize,
-        totalPages: data.data.totalPages,
-        totalItems: data.data.totalElements,
+        page: data.currentPage,
+        pageSize: data.pageSize,
+        totalPages: data.totalPages,
+        totalItems: data.totalElements,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể tải danh sách người dùng.");

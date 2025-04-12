@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { HeartIcon, ShoppingCartIcon, TrashIcon, SearchIcon } from 'lucide-react'
+import { HeartIcon, TrashIcon, SearchIcon } from 'lucide-react'
 import { useFavourite } from '@/hooks/users/useFavourite'
 import Image from 'next/image'
 import { FavouriteResponse } from 'types/favourite/favourite-response.type'
@@ -12,7 +12,7 @@ export function Favorites() {
   const [searchQuery, setSearchQuery] = useState('')
 
   // Lọc danh sách yêu thích theo từ khóa tìm kiếm
-  const filteredItems = favourites.filter((item : FavouriteResponse) => {
+  const filteredItems = favourites.filter((item: FavouriteResponse) => {
     if (searchQuery && !item.nameProduct.toLowerCase().includes(searchQuery.toLowerCase())) return false
     return true
   })
@@ -118,13 +118,13 @@ export function Favorites() {
                     </span>
                   </div>
                   <div className="mt-auto flex flex-wrap gap-3">
-                    <button
+                    {/* <button
                       disabled={!item.stockStatus}
                       className={`flex items-center gap-2 px-4 py-2 rounded-full ${item.stockStatus ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-100 text-gray-400 cursor-not-allowed'} transition-colors`}
                     >
                       <ShoppingCartIcon size={18} />
                       <span>Thêm vào giỏ</span>
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => removeFavourite(item.id)}
                       className="flex items-center gap-2 px-4 py-2 border border-red-500 text-red-500 rounded-full hover:bg-red-50 transition-colors"

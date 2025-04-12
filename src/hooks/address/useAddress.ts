@@ -15,8 +15,12 @@ export const useAddresses = () => {
       const addressData = await addressService.getAddressesByUser();
       setAddresses(addressData);
       setError(null);
-    } catch (err) {
-      setError(err instanceof Error? err.message: "Lỗi khi lấy danh sách địa chỉ");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Lỗi khi lấy danh sách địa chỉ");
+      }
       setAddresses(null);
     } finally {
       setLoading(false);
@@ -33,8 +37,12 @@ export const useAddresses = () => {
     try {
       await addressService.createAddress(addressData);
       fetchAddresses();
-    } catch (err) {  
-      setError(err instanceof Error? err.message:  "Lỗi khi thêm địa chỉ");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Lỗi khi thêm địa chỉ");
+      }
     } finally {
       setLoading(false);
     }
@@ -46,8 +54,12 @@ export const useAddresses = () => {
     try {
       await addressService.updateAddress(id, addressData);
       fetchAddresses();
-    } catch (err) {
-      setError(err instanceof Error? err.message:  "Lỗi khi cập nhật địa chỉ");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Lỗi khi cập nhật địa chỉ");
+      }
     } finally {
       setLoading(false);
     }
@@ -59,8 +71,12 @@ export const useAddresses = () => {
     try {
       await addressService.deleteAddress(id);
       fetchAddresses();
-    } catch (err) {
-      setError(err instanceof Error? err.message:  "Lỗi khi xóa địa chỉ");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Lỗi khi xóa địa chỉ");
+      }
     } finally {
       setLoading(false);
     }
@@ -72,8 +88,12 @@ export const useAddresses = () => {
     try {
       await addressService.setDefaultAddress(id);
       fetchAddresses();
-    } catch (err) {
-      setError(err instanceof Error? err.message:  "Lỗi khi đặt địa chỉ mặc định");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Lỗi khi đặt địa chỉ mặc định");
+      }
     } finally {
       setLoading(false);
     }

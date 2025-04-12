@@ -19,8 +19,12 @@ export const useFilterProducts = (filters: Record<string, string>, page = 0, pag
         try {
           const data = await filterProducts(filters, page, pageSize);
           if (isMounted) setProducts(data);
-        } catch (err: any) {
-          if (isMounted) setError(err?.message || 'Lỗi không xác định');
+        } catch {
+          // Không cần 'err' nữa, chỉ log lỗi ra console và hiển thị thông báo chung
+          if (isMounted) {
+            setError('Lỗi không xác định');
+            console.error('Failed to fetch filtered products');
+          }
         } finally {
           if (isMounted) setLoading(false);
         }
@@ -35,6 +39,7 @@ export const useFilterProducts = (filters: Record<string, string>, page = 0, pag
 
   return { products, loading, error };
 };
+
 // Hook lấy danh sách tùy chọn lọc
 export const useFilterOptions = () => {
   const [options, setOptions] = useState<FilterOptions | null>(null);
@@ -50,8 +55,12 @@ export const useFilterOptions = () => {
       try {
         const data = await getFilterOptions();
         if (isMounted) setOptions(data);
-      } catch (err: any) {
-        if (isMounted) setError(err?.message || 'Không thể tải tùy chọn lọc');
+      } catch {
+        // Không cần 'err' nữa, chỉ log lỗi ra console và hiển thị thông báo chung
+        if (isMounted) {
+          setError('Không thể tải tùy chọn lọc');
+          console.error('Failed to fetch filter options');
+        }
       } finally {
         if (isMounted) setLoading(false);
       }

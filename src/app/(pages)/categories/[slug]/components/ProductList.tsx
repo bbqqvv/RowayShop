@@ -14,16 +14,16 @@ interface ProductListProps {
 const ProductList: React.FC<ProductListProps> = ({ slug }) => {
   const [activeView, setActiveView] = useState("grid"); // Default view: grid
   const [sortBy, setSortBy] = useState("newest"); // Default sort option: newest
-  
+
   // Fetch products with pagination
-  const { 
-    products, 
-    loading, 
-    error, 
-    page, 
-    totalPages, 
-    setPage, 
-    fetchProducts 
+  const {
+    products,
+    loading,
+    error,
+    page,
+    totalPages,
+    setPage,
+    fetchProducts
   } = useProducts(slug);
 
   const handleAddToCart = (productId: number) => {
@@ -37,8 +37,8 @@ const ProductList: React.FC<ProductListProps> = ({ slug }) => {
   };
 
   useEffect(() => {
-    fetchProducts(); // Fetch products initially
-  }, [slug, page]);
+    fetchProducts();
+  }, [slug, page, fetchProducts]);
 
   if (loading) return <p>Loading products...</p>;
   if (error) return <p>{error}</p>;
@@ -83,11 +83,10 @@ const ProductList: React.FC<ProductListProps> = ({ slug }) => {
       </div>
       {/* Dynamic grid or list view */}
       <div
-        className={`mx-auto ${
-          activeView === "grid"
-            ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-            : "grid grid-cols-1 gap-6"
-        }`}
+        className={`mx-auto ${activeView === "grid"
+          ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          : "grid grid-cols-1 gap-6"
+          }`}
       >
         {products.map((product: ProductResponse) => (
           <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />

@@ -6,7 +6,6 @@ import "react-quill-new/dist/quill.snow.css"; // Đảm bảo bạn nhập đún
 import { DescriptionProps } from "types/type";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
-
 // Bọc ReactQuill trong một component với forwardRef
 const QuillEditor = forwardRef((props: any, ref) => {
   const quillRef = useRef<any>(null);

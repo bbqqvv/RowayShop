@@ -92,7 +92,7 @@ const OrderSummary = () => {
       setTimeout(() => {
         router.push("/");
       }, 3000);
-    } catch (error) {
+    } catch  {
       toast.error("Thanh toán thất bại. Vui lòng thử lại!");
     } finally {
       setProcessingPayment(false);

@@ -1,6 +1,7 @@
 import { PaymentMethod } from "types/shared/enums";
 
 export interface OrderResponse {
+    [x: string]: any;
     id: number;
     userId: number;
     name: string;

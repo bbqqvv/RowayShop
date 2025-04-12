@@ -24,7 +24,6 @@ const AddressTab: React.FC = () => {
     const [provinces, setProvinces] = useState<OptionType[]>([]);
     const [districts, setDistricts] = useState<OptionType[]>([]);
     const [wards, setWards] = useState<OptionType[]>([]);
-    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
     const [newAddress, setNewAddress] = useState<AddressResponse>({
@@ -137,8 +136,8 @@ const AddressTab: React.FC = () => {
                     <div
                         key={address.id}
                         className={`p-4 border rounded-lg ${address.defaultAddress
-                                ? "border-gray-500 bg-white"
-                                : "border-gray-200"
+                            ? "border-gray-500 bg-white"
+                            : "border-gray-200"
                             }`}
                     >
                         <div className="grid grid-cols-2 gap-2 mb-2">
@@ -169,8 +168,8 @@ const AddressTab: React.FC = () => {
                             <button
                                 onClick={() => setDefaultAddress(address.id)}
                                 className={`px-3 py-1 text-sm rounded ${address.defaultAddress
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                             >
                                 {address.defaultAddress ? "Mặc định" : "Đặt mặc định"}

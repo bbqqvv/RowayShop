@@ -23,18 +23,18 @@ export const orderService = {
   // Lấy danh sách đơn hàng của người dùng hiện tại
   async getOrdersByUser(page: number = 0, size: number = 10): Promise<ApiResponse<PaginatedResponse<OrderResponse>>> {
     const response = await apiClient.get(`/me?page=${page}&size=${size}`);
-    return response.data ; 
+    return response.data;
   },
 
   // Lấy tất cả đơn hàng (admin)
-  async getAllOrders(page: number = 0, size: number = 10): Promise<ApiResponse<PaginatedResponse<OrderResponse>>>{
+  async getAllOrders(page: number = 0, size: number = 10): Promise<ApiResponse<PaginatedResponse<OrderResponse>>> {
     const response = await apiClient.get(`?page=${page}&size=${size}`);
-    return response.data ;
+    return response.data;
   },
 
   // Lấy đơn hàng theo ID
-  async getOrderById(id: number): Promise<ApiResponse<OrderResponse>> {
-    const response = await apiClient.get(`/${id}`);
+  async getOrderByOrderCode(orderCode: string): Promise<ApiResponse<OrderResponse>> {
+    const response = await apiClient.get(`/${orderCode}`);
     return response.data || {};
   },
 
@@ -55,7 +55,11 @@ export const orderService = {
     const response = await apiClient.patch(`/${id}/status?status=${status}`);
     return response.data || {};
   },
-
+  // Thêm vào orderService.ts
+  async checkProductDelivery(productId: number): Promise<ApiResponse<boolean>> {
+    const response = await apiClient.get(`/check-delivery/${productId}`);
+    return response.data;
+  },
   // Hủy đơn hàng
   async cancelOrder(id: number): Promise<ApiResponse<string>> {
     const response = await apiClient.delete(`/${id}`);

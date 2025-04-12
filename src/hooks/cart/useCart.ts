@@ -69,17 +69,23 @@ export const useCart = () => {
   };
 
   // Xóa sản phẩm khỏi giỏ hàng
-  const removeItemFromCart = async (productId: number, sizeName: string, color: string) => {
+  const removeItemFromCart = async (item: CartItemRequest) => {
     setLoading(true);
     try {
-      const updatedCart = await cartService.removeProduct(productId, sizeName, color);
-      setCart(updatedCart);
+      // Truyền đúng các tham số cần thiết
+      const updatedCart = await cartService.removeProduct({
+        productId: item.productId,  // Truyền productId
+        sizeName: item.sizeName,    // Truyền sizeName
+        color: item.color           // Truyền color
+      });
+      setCart(updatedCart);  // Cập nhật giỏ hàng sau khi xóa
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi khi xóa sản phẩm');
     } finally {
       setLoading(false);
     }
   };
+  
 
   // Xóa toàn bộ giỏ hàng
   const clearCartItems = async () => {

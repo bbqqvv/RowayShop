@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { productReviewService } from "@/services/productReviewService";
 import { ProductReviewResponse } from "types/product/product-review-response.type";
 import { ApiResponse, PaginatedResponse } from "types/api-response.type";
@@ -18,7 +18,7 @@ export const useProductReviews = () => {
         setReviews(response.data.items);  // Set danh sách đánh giá sản phẩm
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Lỗi khi lấy danh sách đánh giá");
+        console.error(err)
         setReviews(null);
       } finally {
         setLoading(false);
@@ -36,7 +36,7 @@ export const useProductReviews = () => {
         setReviews(response.data.items);  // Set danh sách đánh giá của người dùng
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Lỗi khi lấy danh sách đánh giá của người dùng");
+        console.error(err)
         setReviews(null);
       } finally {
         setLoading(false);
@@ -53,7 +53,7 @@ export const useProductReviews = () => {
       setReviews((prevReviews) => (prevReviews ? [newReview, ...prevReviews] : [newReview]));
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Lỗi khi thêm/cập nhật đánh giá");
+      console.error(err)
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ export const useProductReviews = () => {
       setReviews((prevReviews) => prevReviews?.filter((review) => review.id !== id) || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Lỗi khi xóa đánh giá");
+      console.error(err)
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export const useProductReviews = () => {
       await productReviewService.setDefaultReview(id);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Lỗi khi đặt đánh giá mặc định");
+      console.error(err)
     } finally {
       setLoading(false);
     }

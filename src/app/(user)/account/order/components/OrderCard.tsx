@@ -2,7 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { FiChevronRight } from "react-icons/fi";
 import { OrderResponse } from "types/order/order-response.type";
-
+import Image from "next/image";
 // Format giá tiền
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
@@ -17,17 +17,16 @@ const OrderCard = ({ order }: { order: OrderResponse }) => {
             <h3 className="font-semibold">Mã đơn hàng: {order.id}</h3>
             <p className="text-sm text-gray-500">Ngày tạo: {new Date(order.createdAt).toLocaleDateString()}</p>
           </div>
-          
+
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
-              order.status === "delivered"
-                ? "bg-green-100 text-green-800"
-                : order.status === "shipping"
+            className={`px-3 py-1 rounded-full text-xs font-medium ${order.status === "delivered"
+              ? "bg-green-100 text-green-800"
+              : order.status === "shipping"
                 ? "bg-blue-100 text-blue-800"
                 : order.status === "cancelled"
-                ? "bg-red-100 text-red-800"
-                : "bg-yellow-100 text-yellow-800"
-            }`}
+                  ? "bg-red-100 text-red-800"
+                  : "bg-yellow-100 text-yellow-800"
+              }`}
           >
             {order.status}
           </span>
@@ -38,10 +37,12 @@ const OrderCard = ({ order }: { order: OrderResponse }) => {
       <div className="p-4">
         {order.orderItems.map((item, index) => (
           <div key={index} className="flex gap-4 mb-4 last:mb-0">
-            <img
-              src={item.mainImageUrl}
+            <Image
+              src={item.mainImageUrl || '/default-image.jpg'}  // Nếu không có URL, sử dụng ảnh mặc định
               alt={item.productName}
-              className="w-20 h-20 object-cover rounded-md border"
+              width={80}  // Kích thước ảnh chiều rộng
+              height={80} // Kích thước ảnh chiều cao
+              className="object-cover rounded-md border"
             />
             <div>
               <h4 className="font-medium">{item.productName}</h4>
@@ -70,9 +71,9 @@ const OrderCard = ({ order }: { order: OrderResponse }) => {
           <span className="font-semibold">{formatPrice(order.totalAmount)}</span>
         </div>
         <Link href={`/account/order/order-detail/${order.orderCode}`} className="mt-3 w-full flex items-center justify-center gap-2 py-2 px-4 border rounded-lg text-sm hover:bg-gray-100">
-            Xem chi tiết <FiChevronRight />
-          </Link>
-          
+          Xem chi tiết <FiChevronRight />
+        </Link>
+
       </div>
     </div>
   );

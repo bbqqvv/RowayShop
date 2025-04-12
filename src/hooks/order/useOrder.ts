@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { orderService } from "@/services/orderService";
 import { OrderResponse } from "types/order/order-response.type";
 import { OrderRequest } from "types/order/order-request.type";
@@ -9,6 +9,9 @@ export const useOrders = () => {
   const [loading, setLoading] = useState<boolean>(false); // Trạng thái đang tải
   const [error, setError] = useState<string | null>(null); // Lỗi
   const [page, setPage] = useState<number>(0); // Trang hiện tại
+  const [currentOrder, setCurrentOrder] = useState<OrderResponse | null>(null);
+  const deliveryStatusCache = useRef<Record<number, boolean>>({});
+
   const [pagination, setPagination] = useState({
     currentPage: 0,
     totalPages: 0,
@@ -23,7 +26,7 @@ export const useOrders = () => {
       const response: ApiResponse<PaginatedResponse<OrderResponse>> = await orderService.getOrdersByUser(page);
       if (response.success) {
         const orderData: PaginatedResponse<OrderResponse> = response.data;
-        
+
         // Lọc đơn hàng trùng lặp
         setOrders((prevOrders) => {
           const newOrders = orderData.items.filter(
@@ -31,7 +34,7 @@ export const useOrders = () => {
           );
           return [...prevOrders, ...newOrders];
         });
-        
+
         setPagination({
           currentPage: orderData.currentPage,
           totalPages: orderData.totalPages,
@@ -57,6 +60,26 @@ export const useOrders = () => {
   const loadMoreOrders = () => {
     if (loading || page >= pagination.totalPages - 1) return; // Nếu đang tải hoặc đã đến trang cuối thì không tải thêm
     setPage((prevPage) => prevPage + 1); // Tăng page lên để tải thêm dữ liệu
+  };
+
+  const getOrderByOrderCode = async (orderCode: string) => {
+    setLoading(true); // Bắt đầu loading
+    try {
+      const response = await orderService.getOrderByOrderCode(orderCode);
+      if (response.success) {
+        // Nếu thành công, lưu thông tin đơn hàng vào state
+        const order = response.data;
+        setOrders((prevOrders) => [...prevOrders, order]); // Cập nhật danh sách đơn hàng (nếu muốn lưu vào danh sách)
+        setCurrentOrder(order); // Lưu đơn hàng hiện tại vào state
+        console.log("Đơn hàng:", order); // In thông tin đơn hàng ra console hoặc làm gì đó với nó
+      } else {
+        setError(response.message); // Nếu không thành công, hiển thị lỗi từ API
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Lỗi khi lấy thông tin đơn hàng");
+    } finally {
+      setLoading(false); // Đã xong việc loading
+    }
   };
 
   // Thêm đơn hàng mới
@@ -126,7 +149,23 @@ export const useOrders = () => {
       setLoading(false);
     }
   };
+  const checkProductDeliveryStatus = useCallback(async (productId: number): Promise<boolean> => {
+    // Kiểm tra cache trước
+    if (deliveryStatusCache.current[productId] !== undefined) {
+      return deliveryStatusCache.current[productId];
+    }
 
+    try {
+      const response = await orderService.checkProductDelivery(productId);
+      const isDelivered = response.success ? response.data : false;
+      // Lưu vào cache
+      deliveryStatusCache.current[productId] = isDelivered;
+      return isDelivered;
+    } catch (error) {
+      console.error("Error checking delivery status:", error);
+      return false;
+    }
+  }, []);
   // Xóa đơn hàng (admin)
   const deleteOrder = async (id: number) => {
     setLoading(true);
@@ -148,6 +187,9 @@ export const useOrders = () => {
     orders,
     loading,
     error,
+    currentOrder,
+    getOrderByOrderCode,
+    checkProductDeliveryStatus,
     loadMoreOrders,
     addOrder,
     updateOrder,

@@ -35,13 +35,17 @@ export const addOrUpdateProduct = async (cartRequest: CartRequest): Promise<Cart
   return response.data.data;
 };
 
-// Xóa một sản phẩm khỏi giỏ hàng
-export const removeProduct = async (productId: number, sizeName: string, color: string): Promise<CartResponse> => {
+export const removeProduct = async (item: CartItemRequest): Promise<CartResponse> => {
   const response = await apiClient.delete('/remove', {
-    params: { productId, sizeName, color }, // Truyền tham số qua query params
+    params: {
+      productId: item.productId,  
+      sizeName: item.sizeName,    
+      color: item.color           
+    }
   });
   return response.data.data;
 };
+
 
 
 

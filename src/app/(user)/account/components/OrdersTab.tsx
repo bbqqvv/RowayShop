@@ -4,7 +4,7 @@ import OrderList from "../order/components/OrderList";
 import StatusTabs from "../order/components/StatusTabs";
 import { useOrders } from "@/hooks/order/useOrder";
 import LoadingScreen from "@/components/shared/LoadingScreen";
-
+import Image from "next/image";
 export default function OrdersTab() {
   const { orders, loading, error, loadMoreOrders, pagination } = useOrders();
   const [activeTab, setActiveTab] = useState("all");
@@ -61,7 +61,16 @@ export default function OrdersTab() {
           )}
         </div>
       ) : (
-        <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
+        <p className="text-center text-gray-500 flex justify-center items-center">
+        <Image
+          src="/images/not-found-order1.png" // Đường dẫn đến ảnh default
+          alt="Giỏ hàng trống"
+          width={300}
+          height={300}
+          className="mb-6"
+        />
+      </p>
+      
       )}
 
       {/* Hiển thị thông tin phân trang */}
