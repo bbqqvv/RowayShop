@@ -1,6 +1,6 @@
-import { DiscountType } from "types/shared/enums";
+// import { DiscountType } from "types/shared/enums";
 
-
+/*
 declare interface DiscountPreviewResponse {
     discountCode: string;
     discountType: DiscountType;
@@ -10,3 +10,4 @@ declare interface DiscountPreviewResponse {
     valid: boolean;
     message: string;
 }
+*/
