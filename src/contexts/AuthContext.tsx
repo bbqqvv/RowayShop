@@ -21,6 +21,8 @@ interface AuthContextType {
   register: (username: string, password: string, email: string) => Promise<LoginResponse>;
   logout: () => void;
   loading: boolean;
+  setUser: React.Dispatch<React.SetStateAction<UserResponse | null>>; // Add this line
+  setToken: React.Dispatch<React.SetStateAction<string | null>>; // Add this line
 }
 
 // Create AuthContext
@@ -49,7 +51,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(false);
     }
   }, []);
-
 
   const setAuthData = (data: LoginResponse) => {
     setToken(data.token);
@@ -107,7 +108,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, googleSignIn, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, googleSignIn, login, register, logout, loading, setUser, setToken }}>
       {loading ? <LoadingScreen /> : children}
     </AuthContext.Provider>
   );
