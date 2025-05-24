@@ -1,7 +1,12 @@
-import { LoginResponse } from "@/hooks/auth/apiTypes";
 import axios from "axios";
+import { LoginResponse } from "@/hooks/auth/apiTypes";
+import { UserResponse } from "types/user/user-creation-response.type";
 
-const API_URL = "http://localhost:8080/auth"; // Địa chỉ API Spring Boot
+// Cấu hình axios instance
+const api = axios.create({
+  baseURL: "http://localhost:8080/auth",
+  withCredentials: true,
+});
 
 // Login function
 export const loginUser = async (
@@ -9,25 +14,25 @@ export const loginUser = async (
   password: string
 ): Promise<LoginResponse> => {
   try {
-    const response = await axios.post(
-      `${API_URL}/login`,
-      { username, password },
-      { withCredentials: true }
-    );
-    return response.data; // Return data from API
+    const response = await api.post<LoginResponse>("/login", {
+      username,
+      password,
+    });
+    return response.data;
   } catch (error) {
-    console.error("Login error:", error);
-    throw new Error("Login failed. Please check your credentials.");
+    handleAxiosError(error, "Login failed. Please check your credentials.");
   }
 };
+
 // Google OAuth2 login function
 export const googleLogin = async (googleToken: string): Promise<LoginResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/oauth2/google`, { token: googleToken });
-    return response.data; // Trả về dữ liệu từ API
+    const response = await api.post<LoginResponse>("/oauth2/google", {
+      token: googleToken,
+    });
+    return response.data;
   } catch (error) {
-    console.error("Google login error:", error);
-    throw new Error("Google login failed. Please try again.");
+    handleAxiosError(error, "Google login failed. Please try again.");
   }
 };
 
@@ -38,20 +43,36 @@ export const registerUser = async (
   email: string
 ): Promise<LoginResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/register`, {
+    const response = await api.post<LoginResponse>("/register", {
       username,
       password,
       email,
     });
-    return response.data; // Return data from API
+    return response.data;
   } catch (error) {
-    console.error("Registration error:", error);
-    throw new Error("Registration failed. Please try again.");
+    handleAxiosError(error, "Registration failed. Please try again.");
   }
 };
 
-// // Logout function
-// export const logoutUser = () => {
-//   document.cookie = "token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
-//   console.log("Logged out, token cleared");
-// };
+// Get current user profile by token
+export const getUserProfile = async (token: string): Promise<UserResponse> => {
+  try {
+    const response = await axios.get<UserResponse>("http://localhost:8080/api/user/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error, "Failed to fetch user profile.");
+  }
+};
+
+// Error handler helper
+function handleAxiosError(error: unknown, fallbackMessage: string): never {
+  if (axios.isAxiosError(error) && error.response?.data?.message) {
+    throw new Error(error.response.data.message);
+  }
+  console.error(fallbackMessage, error);
+  throw new Error(fallbackMessage);
+}

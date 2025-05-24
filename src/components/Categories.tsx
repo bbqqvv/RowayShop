@@ -15,33 +15,27 @@ export default function Categories() {
 
   useEffect(() => {
     const fetchData = async () => {
-      await fetchCategories();
-      setLoading(false); // Cập nhật loading về false khi dữ liệu đã tải xong
+      // Nếu đã có data thì không fetch lại
+      if (categories.length === 0) {
+        await fetchCategories();
+      }
+      setLoading(false);
     };
 
     fetchData();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Chỉ gọi 1 lần khi mount
 
   useEffect(() => {
-    if (categories.length > 5) {
-      setShowArrows(true);
-    } else {
-      setShowArrows(false);
-    }
+    setShowArrows(categories.length > 5);
   }, [categories]);
 
-  // Scroll Left
   const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -300, behavior: "smooth" });
-    }
+    scrollContainerRef.current?.scrollBy({ left: -300, behavior: "smooth" });
   };
 
-  // Scroll Right
   const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 300, behavior: "smooth" });
-    }
+    scrollContainerRef.current?.scrollBy({ left: 300, behavior: "smooth" });
   };
 
   return (
@@ -53,22 +47,25 @@ export default function Categories() {
           <button
             onClick={scrollLeft}
             className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 bg-gray-200 p-3 rounded-full shadow-md hover:bg-gray-300 transition"
+            aria-label="Scroll Left"
           >
             <ChevronLeft className="w-6 h-6 text-gray-700" />
           </button>
           <button
             onClick={scrollRight}
             className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 bg-gray-200 p-3 rounded-full shadow-md hover:bg-gray-300 transition"
+            aria-label="Scroll Right"
           >
             <ChevronRight className="w-6 h-6 text-gray-700" />
           </button>
         </>
       )}
 
-      {/* Hiển thị Skeleton nếu đang tải dữ liệu */}
       <div
         ref={scrollContainerRef}
-        className={`flex overflow-x-auto scroll-smooth px-4 gap-3 ${categories.length > 5 ? "lg:grid lg:grid-cols-5 lg:overflow-hidden" : "justify-center"
+        className={`flex overflow-x-auto scroll-smooth px-4 gap-3 ${categories.length > 5
+          ? "lg:grid lg:grid-cols-5 lg:overflow-hidden"
+          : "justify-center"
           }`}
       >
         {loading || categories.length === 0 ? (
