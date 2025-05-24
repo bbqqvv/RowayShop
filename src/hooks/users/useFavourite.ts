@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { favouriteService } from "@/services/favouriteService";
 import { FavouriteResponse } from "types/favourite/favourite-response.type";
 import { addFav, removeFav, setFav } from "@/redux/slices/favouriteSlice";
+import { RootState } from "@/redux/store";
 
 interface Pagination {
   currentPage: number;
@@ -13,7 +14,7 @@ interface Pagination {
 
 export const useFavourite = () => {
   const dispatch = useDispatch();
-  const favouritesFromRedux = useSelector((state: any) => state.favourites.favourites);
+  const favouritesFromRedux = useSelector((state: RootState) => state.favourites.favourites);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

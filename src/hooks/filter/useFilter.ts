@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { filterProducts, getFilterOptions } from '@/services/filterService';
+import { productFilterService } from '@/services/filterService';
 import { ApiResponse, PaginatedResponse } from 'types/api-response.type';
 import { ProductResponse } from 'types/product/product-response.types';
 import { FilterOptions } from 'types/type';
@@ -17,7 +17,7 @@ export const useFilterProducts = (filters: Record<string, string>, page = 0, pag
         setLoading(true);
         setError(null);
         try {
-          const data = await filterProducts(filters, page, pageSize);
+          const data = await productFilterService.filterProducts(filters, page, pageSize);
           if (isMounted) setProducts(data);
         } catch {
           // Không cần 'err' nữa, chỉ log lỗi ra console và hiển thị thông báo chung
@@ -53,7 +53,7 @@ export const useFilterOptions = () => {
       setError(null);
 
       try {
-        const data = await getFilterOptions();
+        const data = await productFilterService.getFilterOptions();
         if (isMounted) setOptions(data);
       } catch {
         // Không cần 'err' nữa, chỉ log lỗi ra console và hiển thị thông báo chung

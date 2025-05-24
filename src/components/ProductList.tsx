@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useProducts } from "@/hooks/products/useProducts";
 import { useRecentlyViewedProducts } from "@/hooks/products/useRecentlyViewedProducts";
 
@@ -10,8 +10,6 @@ import ProductCard from "./products/ProductCard";
 
 const ITEMS_PER_PAGE = 8;
 
-type FilterType = "all" | "featured" | "discount";
-
 const ProductList = () => {
   const {
     products,
@@ -19,12 +17,10 @@ const ProductList = () => {
     totalPages,
     fetchProducts,
     setPage,
-    loading: isProductsLoading,
   } = useProducts(undefined, 1, ITEMS_PER_PAGE);
 
   const { markAsViewed } = useRecentlyViewedProducts();
 
-  const [filterType, setFilterType] = useState<FilterType>("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Fetch products when page changes
@@ -40,14 +36,6 @@ const ProductList = () => {
     }
   }, [page, fetchProducts, products.length]);
 
-  const filteredProducts = useMemo(() => {
-    return products.filter(({ salePercentage, featured }) => {
-      if (filterType === "featured") return featured;
-      if (filterType === "discount") return salePercentage > 0;
-      return true;
-    });
-  }, [products, filterType]);
-
   const handleLoadMore = useCallback(async () => {
     if (page < totalPages) {
       setIsLoadingMore(true);
@@ -61,7 +49,6 @@ const ProductList = () => {
 
   return (
     <section className="container py-8">
-
       {/* Product Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {products.length === 0 ? (
@@ -69,7 +56,7 @@ const ProductList = () => {
             <ProductSkeleton key={`skeleton-${index}`} />
           ))
         ) : (
-          filteredProducts.map((product) => (
+          products.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -78,7 +65,6 @@ const ProductList = () => {
           ))
         )}
       </div>
-
 
       <LoadMoreButton
         page={page}

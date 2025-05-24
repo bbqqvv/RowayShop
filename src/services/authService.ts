@@ -1,6 +1,5 @@
 import apiClient from "@/apiClient";
 import { LoginResponse } from "@/hooks/auth/apiTypes";
-import { UserResponse } from "types/user/user-creation-response.type";
 
 const BASE_URL = "/api/auth";
 

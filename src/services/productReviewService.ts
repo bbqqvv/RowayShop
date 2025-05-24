@@ -8,7 +8,7 @@ const BASE_URL = "/api/product-reviews";
 
 export const productReviewService = {
   // Thêm hoặc cập nhật đánh giá sản phẩm
-  async addOrUpdateReview(reviewData: ProductReviewRequest): Promise<any> {
+  async addOrUpdateReview(reviewData: ProductReviewRequest): Promise<ProductReviewResponse> {
     const response = await apiClient.post(`${BASE_URL}/add-or-update`, reviewData);
     return response.data?.data;
   },
@@ -34,13 +34,13 @@ export const productReviewService = {
   },
 
   // Xóa đánh giá sản phẩm
-  async deleteReview(reviewId: number): Promise<any> {
+  async deleteReview(reviewId: number): Promise<ProductReviewResponse> {
     const response = await apiClient.delete(`${BASE_URL}/remove/${reviewId}`);
     return response.data?.data;
   },
 
   // Đặt đánh giá mặc định
-  async setDefaultReview(reviewId: number): Promise<any> {
+  async setDefaultReview(reviewId: number): Promise<ProductReviewResponse> {
     const response = await apiClient.put(`${BASE_URL}/set-default/${reviewId}`);
     return response.data?.data;
   }

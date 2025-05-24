@@ -20,7 +20,7 @@ export const favouriteService = {
   },
 
   // ✅ Xóa sản phẩm khỏi danh sách yêu thích
-  async removeFavourite(productId: number): Promise<any> {
+  async removeFavourite(productId: number): Promise<FavouriteResponse> {
     const response = await apiClient.delete(`${BASE_URL}/${productId}`);
     return response.data;
   },
