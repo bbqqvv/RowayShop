@@ -12,7 +12,7 @@ export const useRecentlyViewedProducts = (initialPage = 0, initialPageSize = 8) 
         setLoading(true);
         try {
             const response = await getRecentlyViewedProducts(page, pageSize);
-            console.log("Viewed:", response); // <- response.data hay response?
+            console.log("Viewed:", response); 
 
             setProducts(response?.items || []);
             setError(null);

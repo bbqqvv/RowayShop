@@ -1,0 +1,43 @@
+import { cn } from "@/utils";
+import { VariantProps, cva } from "class-variance-authority";
+import { HTMLAttributes, forwardRef } from "react";
+
+const badgeVariants = cva(
+    "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+    {
+        variants: {
+            variant: {
+                default:
+                    "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+                destructive:
+                    "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+                outline: "text-foreground",
+                secondary:
+                    "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+            },
+        },
+        defaultVariants: {
+            variant: "default",
+        },
+    }
+);
+
+export interface BadgeProps
+    extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> { }
+
+const Badge = forwardRef<HTMLDivElement, BadgeProps>(
+    ({ className, variant, ...props }, ref) => {
+        return (
+            <div
+                ref={ref}
+                className={cn(badgeVariants({ variant }), className)}
+                {...props}
+            />
+        );
+    }
+);
+
+Badge.displayName = "Badge";
+
+export { Badge, badgeVariants };
