@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback } from 'react';
-import { getFeaturedProduct } from '@/services/productService';
+import { productService } from '@/services/productService';
 import { ProductResponse } from 'types/product/product-response.types';
 
 export const useFeaturedProducts = (initialPage = 0, initialPageSize = 8) => {
@@ -13,7 +13,7 @@ export const useFeaturedProducts = (initialPage = 0, initialPageSize = 8) => {
   const fetchFeaturedProducts = useCallback(async (page = initialPage, pageSize = initialPageSize) => {
     setLoading(true);
     try {
-      const response = await getFeaturedProduct(page, pageSize);
+      const response = await productService.getFeaturedProduct(page, pageSize);
       setProducts(response.data.items);
       setTotalItems(response.data.totalElements);
       setTotalPages(Math.ceil(response.data.totalElements / pageSize));

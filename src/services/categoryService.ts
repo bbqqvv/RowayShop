@@ -1,50 +1,31 @@
-import axios from "axios";
+import apiClient from "@/apiClient";
+import { CategoryResponse } from "types/category/category-response.type";
 
-const apiClient = axios.create({
-  baseURL: "http://localhost:8080/api/categories", // Base URL
-});
-// Lấy danh sách tất cả các danh mục
-export const getAllCategories = async () => {
-  const response = await apiClient.get('');
-  return response.data; // { items: [], currentPage: 0, totalPages: ..., etc. }
+const BASE_URL = "/api/categories";
+
+const categoryService = {
+  async getAllCategories(): Promise<CategoryResponse[]> {
+    const response = await apiClient.get(`${BASE_URL}`);
+    return response.data.data;
+  },
+
+  // Tạo mới một danh mục
+  async createCategory(formData: FormData): Promise<CategoryResponse> {
+    const response = await apiClient.post(`${BASE_URL}`, formData);
+    return response.data.data;
+  },
+
+  // Cập nhật một danh mục
+  async updateCategory(id: number, formData: FormData): Promise<CategoryResponse> {
+    const response = await apiClient.put(`${BASE_URL}/${id}`, formData);
+    return response.data.data;
+  },
+
+  // Xóa một danh mục
+  // Nếu API không trả về dữ liệu sau khi xóa, bạn có thể dùng Promise<void>
+  async deleteCategory(id: number): Promise<void> {
+    await apiClient.delete(`${BASE_URL}/${id}`);
+  },
 };
 
-
-// Tạo mới một danh mục
-export const createCategory = async (
-  token: string,
-  formData: FormData 
-) => {
-  const response = await apiClient.post("", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data", 
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
-
-// Cập nhật một danh mục (sử dụng FormData)
-export const updateCategory = async (
-  token: string,
-  id: number,
-  formData: FormData 
-) => {
-  const response = await apiClient.put(`/${id}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
-
-// Xóa một danh mục
-export const deleteCategory = async (token: string, id: number) => {
-  const response = await apiClient.delete(`/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
+export default categoryService;

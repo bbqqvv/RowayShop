@@ -1,7 +1,7 @@
 // hooks/cart/useCart.ts
 
+import cartService from '@/services/cartService';
 import { useState, useEffect, useCallback } from 'react';
-import * as cartService from '@/services/cartService';
 import { CartRequest, CartItemRequest } from 'types/cart/cart-request.type';
 import { CartResponse } from 'types/cart/cart-response.type';
 
@@ -23,7 +23,7 @@ export const useCart = () => {
       setLoading(false);
     }
   }, []);
-  
+
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
@@ -40,7 +40,7 @@ export const useCart = () => {
       setLoading(false);
     }
   };
-  
+
 
   // Tăng số lượng sản phẩm trong giỏ hàng
   const increaseItemQuantity = async (cartRequest: CartRequest) => {
@@ -85,7 +85,7 @@ export const useCart = () => {
       setLoading(false);
     }
   };
-  
+
 
   // Xóa toàn bộ giỏ hàng
   const clearCartItems = async () => {

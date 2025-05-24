@@ -1,52 +1,38 @@
-import axios from "axios";
-import Cookies from "js-cookie";
+import apiClient from "@/apiClient";
 import { ApiResponse } from "types/api-response.type";
 import { SupportItemRequest } from "types/support/support-request.type";
 import { SupportItemResponse } from "types/support/support-response.type";
 
-const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/support",
-  headers: { "Content-Type": "application/json" },
-  withCredentials: true,
-});
-
-// Tự động gắn Authorization token nếu có
-apiClient.interceptors.request.use((config) => {
-  const token = Cookies.get("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+const BASE_URL = "/api/support-items";
 
 export const supportItemService = {
   // 🟢 Lấy tất cả support items
-  getAllSupportItems: async (): Promise<ApiResponse<SupportItemResponse[]>> => {
-    const response = await apiClient.get("");
+  async getAllSupportItems(): Promise<ApiResponse<SupportItemResponse[]>> {
+    const response = await apiClient.get(`${BASE_URL}`);
     return response.data;  // Trả về dữ liệu đúng
   },
 
   // 🟢 Lấy thông tin 1 support item theo ID
-  getSupportItemById: async (id: number): Promise<ApiResponse<SupportItemResponse>> => {
-    const response = await apiClient.get(`/${id}`);
+  async getSupportItemById(id: number): Promise<ApiResponse<SupportItemResponse>> {
+    const response = await apiClient.get(`${BASE_URL}/${id}`);
     return response.data;  // Trả về dữ liệu đúng
   },
 
   // 🟡 Tạo mới support item
-  createSupportItem: async (data: SupportItemRequest): Promise<ApiResponse<SupportItemResponse>> => {
-    const response = await apiClient.post("", data);
+  async createSupportItem(data: SupportItemRequest): Promise<ApiResponse<SupportItemResponse>> {
+    const response = await apiClient.post(`${BASE_URL}`, data);
     return response.data;  // Trả về dữ liệu đúng
   },
 
   // 🟡 Cập nhật support item
-  updateSupportItem: async (id: number, data: SupportItemRequest): Promise<ApiResponse<SupportItemResponse>> => {
-    const response = await apiClient.put(`/${id}`, data);
+  async updateSupportItem(id: number, data: SupportItemRequest): Promise<ApiResponse<SupportItemResponse>> {
+    const response = await apiClient.put(`${BASE_URL}/${id}`, data);
     return response.data;  // Trả về dữ liệu đúng
   },
 
   // 🔴 Xóa support item theo ID
-  deleteSupportItem: async (id: number): Promise<ApiResponse<string>> => {
-    const response = await apiClient.delete(`/${id}`);
+  async deleteSupportItem(id: number): Promise<ApiResponse<string>> {
+    const response = await apiClient.delete(`${BASE_URL}/${id}`);
     return response.data;  // Trả về dữ liệu đúng
   },
 };

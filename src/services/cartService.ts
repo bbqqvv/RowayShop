@@ -1,68 +1,53 @@
 // services/cartService.ts
 
-import axios from 'axios';
-import Cookies from "js-cookie";
+import apiClient from '@/apiClient';
 import { CartRequest, CartItemRequest } from 'types/cart/cart-request.type';
 import { CartResponse } from 'types/cart/cart-response.type';
 
-// Tạo client Axios
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api/cart', // URL gốc của API
-  headers: {
-    'Content-Type': 'application/json',
+const BASE_URL = '/api/cart';
+
+const cartService = {
+  // Lấy giỏ hàng của người dùng
+  async getCart(): Promise<CartResponse> {
+    const response = await apiClient.get(`${BASE_URL}`);
+    return response.data.data;
   },
-  withCredentials: true,
-});
-// ✅ Tự động gắn Authorization token nếu có
-apiClient.interceptors.request.use((config) => {
-  const token = Cookies.get("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
+  // Thêm hoặc cập nhật sản phẩm trong giỏ hàng
+  async addOrUpdateProduct(cartRequest: CartRequest): Promise<CartResponse> {
+    const response = await apiClient.post(`${BASE_URL}/add-or-update`, cartRequest);
+    return response.data.data;
+  },
 
-// Lấy giỏ hàng của người dùng
-export const getCart = async (): Promise<CartResponse> => {
-  const response = await apiClient.get('');
-  return response.data.data;
+  // Xóa sản phẩm khỏi giỏ hàng
+  async removeProduct(item: CartItemRequest): Promise<CartResponse> {
+    const response = await apiClient.delete(`${BASE_URL}/remove`, {
+      params: {
+        productId: item.productId,
+        sizeName: item.sizeName,
+        color: item.color,
+      },
+    });
+    return response.data.data;
+  },
+
+  // Tăng số lượng sản phẩm trong giỏ hàng
+  async increaseProductQuantity(cartRequest: CartRequest): Promise<CartResponse> {
+    const response = await apiClient.post(`${BASE_URL}/increase`, cartRequest);
+    return response.data.data;
+  },
+
+  // Giảm số lượng sản phẩm trong giỏ hàng
+  async decreaseProductQuantity(cartRequest: CartRequest): Promise<CartResponse> {
+    const response = await apiClient.post(`${BASE_URL}/decrease`, cartRequest);
+    return response.data.data;
+  },
+
+  // Xóa toàn bộ giỏ hàng
+  async clearCart(): Promise<void> {
+    const response = await apiClient.delete(`${BASE_URL}/clear`);
+    return response.data.data;
+  },
 };
 
-// Thêm hoặc cập nhật sản phẩm trong giỏ hàng
-export const addOrUpdateProduct = async (cartRequest: CartRequest): Promise<CartResponse> => {
-  const response = await apiClient.post('/add-or-update', cartRequest);
-  return response.data.data;
-};
-
-export const removeProduct = async (item: CartItemRequest): Promise<CartResponse> => {
-  const response = await apiClient.delete('/remove', {
-    params: {
-      productId: item.productId,  
-      sizeName: item.sizeName,    
-      color: item.color           
-    }
-  });
-  return response.data.data;
-};
-
-
-
-
-// Tăng số lượng sản phẩm trong giỏ hàng
-export const increaseProductQuantity = async (cartRequest: CartRequest): Promise<CartResponse> => {
-  const response = await apiClient.post('/increase', cartRequest);
-  return response.data.data;
-};
-
-// Giảm số lượng sản phẩm trong giỏ hàng
-export const decreaseProductQuantity = async (cartRequest: CartRequest): Promise<CartResponse> => {
-  const response = await apiClient.post('/decrease', cartRequest);
-  return response.data.data;
-};
-
-// Xóa toàn bộ giỏ hàng
-export const clearCart = async (): Promise<void> => {
-  const response = await apiClient.delete('/clear');
-  return response.data.data;
-};
+export default cartService;

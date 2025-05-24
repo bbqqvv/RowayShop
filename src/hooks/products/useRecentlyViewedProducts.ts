@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback } from "react";
-import { getRecentlyViewedProducts, markProductAsViewed, syncViewedProducts } from "@/services/productService";
+import { productService } from "@/services/productService";
 import { ProductResponse } from "types/product/product-response.types";
 
 export const useRecentlyViewedProducts = (initialPage = 0, initialPageSize = 8) => {
@@ -11,8 +11,8 @@ export const useRecentlyViewedProducts = (initialPage = 0, initialPageSize = 8) 
     const fetchRecentlyViewed = useCallback(async (page = initialPage, pageSize = initialPageSize) => {
         setLoading(true);
         try {
-            const response = await getRecentlyViewedProducts(page, pageSize);
-            console.log("Viewed:", response); 
+            const response = await productService.getRecentlyViewedProducts(page, pageSize);
+            console.log("Viewed:", response);
 
             setProducts(response?.items || []);
             setError(null);
@@ -25,14 +25,14 @@ export const useRecentlyViewedProducts = (initialPage = 0, initialPageSize = 8) 
     }, [initialPage, initialPageSize]);
     const markAsViewed = useCallback(async (productId: number) => {
         try {
-            await markProductAsViewed(productId);
+            await productService.markProductAsViewed(productId);
         } catch (err) {
             console.error("Failed to mark product as viewed", err);
         }
     }, []);
     const syncViewed = useCallback(async (productIds: number[]) => {
         try {
-            await syncViewedProducts(productIds);
+            await productService.syncViewedProducts(productIds);
         } catch (err) {
             console.error("Failed to sync viewed products", err);
         }

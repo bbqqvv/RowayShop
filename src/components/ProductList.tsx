@@ -5,7 +5,6 @@ import { useProducts } from "@/hooks/products/useProducts";
 import { useRecentlyViewedProducts } from "@/hooks/products/useRecentlyViewedProducts";
 
 import ProductSkeleton from "./products/ProductSkeleton";
-import FilterControls from "./products/FilterControls";
 import LoadMoreButton from "./products/LoadMoreButton";
 import ProductCard from "./products/ProductCard";
 
@@ -62,19 +61,10 @@ const ProductList = () => {
 
   return (
     <section className="container py-8">
-      {/* Section Header */}
-      <div className="mb-12 text-center">
-        <h2 className="text-4xl font-bold tracking-tight">Our Products</h2>
-        <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-          Discover our carefully curated collection of high-quality products
-        </p>
-
-        <FilterControls filterType={filterType} setFilterType={setFilterType} />
-      </div>
 
       {/* Product Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {isProductsLoading && products.length === 0 ? (
+        {products.length === 0 ? (
           Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
             <ProductSkeleton key={`skeleton-${index}`} />
           ))
@@ -88,6 +78,7 @@ const ProductList = () => {
           ))
         )}
       </div>
+
 
       <LoadMoreButton
         page={page}

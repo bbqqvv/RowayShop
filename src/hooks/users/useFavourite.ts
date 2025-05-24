@@ -1,10 +1,9 @@
-import { addFavourite, getFavourites, removeFavourite } from "@/services/favouriteService";
 import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { favouriteService } from "@/services/favouriteService";
 import { FavouriteResponse } from "types/favourite/favourite-response.type";
-import { addFav, removeFav, setFav } from "@/redux/slices/favouriteSlice"; // Redux actions
+import { addFav, removeFav, setFav } from "@/redux/slices/favouriteSlice";
 
-// Định nghĩa kiểu cho dữ liệu phân trang
 interface Pagination {
   currentPage: number;
   totalPages: number;
@@ -12,104 +11,106 @@ interface Pagination {
   pageSize: number;
 }
 
-// Định nghĩa kiểu cho trạng thái Redux (Giả sử RootState là kiểu toàn cục của trạng thái Redux)
-interface RootState {
-  favourites: {
-    favourites: FavouriteResponse[]; // Kiểu dữ liệu của yêu thích trong Redux
-  };
-}
-
 export const useFavourite = () => {
   const dispatch = useDispatch();
-  // Thay 'any' bằng kiểu RootState
-  const favouritesFromRedux = useSelector((state: RootState) => state.favourites.favourites);
+  const favouritesFromRedux = useSelector((state: any) => state.favourites.favourites);
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [pagination, setPagination] = useState<Pagination>({
     currentPage: 0,
     totalPages: 0,
     totalElements: 0,
     pageSize: 10,
-  }); // Quản lý thông tin phân trang
+  });
 
-  /** 🔄 Lấy danh sách yêu thích từ API */
-  const fetchFavourites = useCallback(async (page: number = 0) => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await getFavourites(page);
-      // Cập nhật Redux với dữ liệu yêu thích từ API
-      dispatch(setFav(response.data.items));
+  const fetchFavourites = useCallback(
+    async (page: number = 0) => {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await favouriteService.getFavourites(page, pagination.pageSize);
+        dispatch(setFav(response.data.items));
 
-      // Cập nhật thông tin phân trang
-      setPagination({
-        currentPage: response.data.currentPage,
-        totalPages: response.data.totalPages,
-        totalElements: response.data.totalElements,
-        pageSize: response.data.pageSize,
-      });
-    } catch (err) {
-      console.error("❌ Lỗi khi lấy danh sách yêu thích:", err);
-      setError("Không thể lấy danh sách yêu thích.");
-    } finally {
-      setLoading(false);
-    }
-  }, [dispatch]);
+        setPagination({
+          currentPage: response.data.currentPage,
+          totalPages: response.data.totalPages,
+          totalElements: response.data.totalElements,
+          pageSize: response.data.pageSize,
+        });
+      } catch (err) {
+        console.error("❌ Lỗi khi lấy danh sách yêu thích:", err);
+        setError("Không thể lấy danh sách yêu thích.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [dispatch, pagination.pageSize]
+  );
 
   useEffect(() => {
     fetchFavourites();
   }, [fetchFavourites]);
 
-  const addNewFavourite = useCallback(async (productId: number): Promise<FavouriteResponse | undefined> => {
-    setLoading(true);
-    try {
-      const newFavourite = await addFavourite(productId);
-      dispatch(addFav(newFavourite));
-      return newFavourite;
-    } catch (err) {
-      console.error("❌ Lỗi khi thêm vào danh sách yêu thích:", err);
-      return undefined;
-    } finally {
-      setLoading(false);
-    }
-  }, [dispatch]);
-
-  /** ❌ Xóa sản phẩm khỏi danh sách yêu thích */
-  const removeFavouriteItem = useCallback(async (productId: number) => {
-    setLoading(true);
-    try {
-      await removeFavourite(productId);
-      dispatch(removeFav(productId)); // Cập nhật Redux
-    } catch (err) {
-      console.error("❌ Lỗi khi xóa sản phẩm khỏi danh sách yêu thích:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [dispatch]);
-
-  /** 🔄 Toggle trạng thái yêu thích */
-  const toggleFavourite = useCallback(async (productId: number) => {
-    try {
-      if (favouritesFromRedux.some((fav: FavouriteResponse) => fav.id === productId)) {
-        await removeFavouriteItem(productId);
-      } else {
-        await addNewFavourite(productId);
+  const addNewFavourite = useCallback(
+    async (productId: number): Promise<FavouriteResponse | undefined> => {
+      setLoading(true);
+      setError("");
+      try {
+        const newFavourite = await favouriteService.addFavourite(productId);
+        dispatch(addFav(newFavourite));
+        return newFavourite;
+      } catch (err) {
+        console.error("❌ Lỗi khi thêm vào danh sách yêu thích:", err);
+        setError("Không thể thêm sản phẩm yêu thích.");
+        return undefined;
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("❌ Lỗi khi toggle yêu thích:", err);
-    }
-  }, [favouritesFromRedux, addNewFavourite, removeFavouriteItem]);
+    },
+    [dispatch]
+  );
 
-  /** 🔄 Chuyển sang trang tiếp theo */
+  const removeFavouriteItem = useCallback(
+    async (productId: number) => {
+      setLoading(true);
+      setError("");
+      try {
+        await favouriteService.removeFavourite(productId);
+        dispatch(removeFav(productId));
+      } catch (err) {
+        console.error("❌ Lỗi khi xóa sản phẩm khỏi danh sách yêu thích:", err);
+        setError("Không thể xóa sản phẩm yêu thích.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [dispatch]
+  );
+
+  const toggleFavourite = useCallback(
+    async (productId: number) => {
+      try {
+        const isFav = favouritesFromRedux.some((fav: FavouriteResponse) => fav.id === productId);
+        if (isFav) {
+          await removeFavouriteItem(productId);
+        } else {
+          await addNewFavourite(productId);
+        }
+      } catch (err) {
+        console.error("❌ Lỗi khi toggle yêu thích:", err);
+      }
+    },
+    [favouritesFromRedux, addNewFavourite, removeFavouriteItem]
+  );
+
   const goToNextPage = useCallback(() => {
     if (pagination.currentPage + 1 < pagination.totalPages) {
       fetchFavourites(pagination.currentPage + 1);
     }
   }, [pagination, fetchFavourites]);
 
-  /** 🔄 Chuyển sang trang trước */
   const goToPreviousPage = useCallback(() => {
     if (pagination.currentPage > 0) {
       fetchFavourites(pagination.currentPage - 1);
@@ -117,7 +118,7 @@ export const useFavourite = () => {
   }, [pagination, fetchFavourites]);
 
   return {
-    favourites: favouritesFromRedux, // Lấy từ Redux
+    favourites: favouritesFromRedux,
     loading,
     error,
     addNewFavourite,

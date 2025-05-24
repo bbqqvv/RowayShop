@@ -1,22 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  getAllCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} from "@/services/categoryService";
-import axios from "axios";
+import categoryService from "@/services/categoryService";
 import { CategoryResponse } from "types/category/category-response.type";
+import axios from "axios";
 
 export const useCategories = () => {
-  const { token } = useAuthContext();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
-  // Hàm xử lý lỗi từ API
+  // Hàm xử lý lỗi API
   const handleAxiosError = (err: unknown) => {
     if (axios.isAxiosError(err)) {
       return err.response?.data?.message || "An error occurred.";
@@ -24,15 +17,16 @@ export const useCategories = () => {
     return "An unexpected error occurred.";
   };
 
-  // Fetch danh sách danh mục
+  // Lấy danh sách tất cả categories
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     setError("");
     setMessage("");
     try {
-      const response = await getAllCategories();
-      if (response?.data && Array.isArray(response.data)) {
-        setCategories(response.data);
+      // Giả sử có api get all categories (nếu chưa có thì cần thêm vào service)
+      const response = await categoryService.getAllCategories();
+      if (response && Array.isArray(response)) {
+        setCategories(response);
       } else {
         setError("No categories found.");
       }
@@ -43,21 +37,15 @@ export const useCategories = () => {
     }
   }, []);
 
-  // Tạo mới một danh mục
+  // Tạo mới category
   const createNewCategory = useCallback(
     async (formData: FormData) => {
-      if (!token) return;
       setLoading(true);
       setError("");
       setMessage("");
       try {
-        const newCategory = await createCategory(token, formData);
-        setCategories((prevCategories) => {
-          if (!Array.isArray(prevCategories)) {
-            return [newCategory];
-          }
-          return [...prevCategories, newCategory];
-        });
+        const newCategory = await categoryService.createCategory(formData);
+        setCategories((prev) => [...prev, newCategory]);
         setMessage("Category created successfully!");
       } catch (err) {
         setError(handleAxiosError(err));
@@ -65,24 +53,19 @@ export const useCategories = () => {
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
-  // Cập nhật một danh mục
+  // Cập nhật category
   const updateExistingCategory = useCallback(
     async (id: number, formData: FormData) => {
-      if (!token) return;
       setLoading(true);
       setError("");
       setMessage("");
       try {
-        const updatedCategory = await updateCategory(token, id, formData);
-        setCategories((prevCategories) =>
-          Array.isArray(prevCategories)
-            ? prevCategories.map((category) =>
-                category.id === id ? updatedCategory : category
-              )
-            : [updatedCategory]
+        const updatedCategory = await categoryService.updateCategory(id, formData);
+        setCategories((prev) =>
+          prev.map((cat) => (cat.id === id ? updatedCategory : cat))
         );
         setMessage("Category updated successfully!");
       } catch (err) {
@@ -91,23 +74,18 @@ export const useCategories = () => {
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
-  // Xóa danh mục
+  // Xóa category
   const deleteExistingCategory = useCallback(
     async (id: number) => {
-      if (!token) return;
       setLoading(true);
       setError("");
       setMessage("");
       try {
-        await deleteCategory(token, id);
-        setCategories((prevCategories) =>
-          Array.isArray(prevCategories)
-            ? prevCategories.filter((category) => category.id !== id)
-            : []
-        );
+        await categoryService.deleteCategory(id);
+        setCategories((prev) => prev.filter((cat) => cat.id !== id));
         setMessage("Category deleted successfully!");
       } catch (err) {
         setError(handleAxiosError(err));
@@ -115,10 +93,9 @@ export const useCategories = () => {
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
-  // Fetch categories khi component mount
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);

@@ -2,15 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  getProducts,
-  getProductById,
-  getProductBySlug,
-  getProductsByCategory,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  filterProducts,
-  searchProductsByName,
+  productService
 } from '@/services/productService';
 import { ProductResponse } from 'types/product/product-response.types';
 import { ApiResponse, PaginatedResponse } from 'types/api-response.type';
@@ -53,8 +45,8 @@ export const useProducts = (
     setLoading(true);
     try {
       const response = slug
-        ? await getProductsByCategory(slug, page - 1, initialPageSize)
-        : await getProducts(page - 1, initialPageSize);
+        ? await productService.getProductsByCategory(slug, page - 1, initialPageSize)
+        : await productService.getProducts(page - 1, initialPageSize);
       handleResponsePagination(response);
     } catch (err) {
       handleError(err, 'Failed to fetch products');
@@ -68,7 +60,7 @@ export const useProducts = (
     async (query: string) => {
       setLoading(true);
       try {
-        const response = await searchProductsByName(query, page - 1, initialPageSize);
+        const response = await productService.searchProductsByName(query, page - 1, initialPageSize);
         handleResponsePagination(response);
       } catch (err) {
         handleError(err, 'Failed to search products');
@@ -83,7 +75,7 @@ export const useProducts = (
   const fetchProductById = useCallback(async (id: number) => {
     setLoading(true);
     try {
-      const response = await getProductById(id);
+      const response = await productService.getProductById(id);
       setSelectedProduct(response.data);
       setError(null);
     } catch (err) {
@@ -98,7 +90,7 @@ export const useProducts = (
   const fetchProductBySlug = useCallback(async (slug: string) => {
     setLoading(true);
     try {
-      const response = await getProductBySlug(slug);
+      const response = await productService.getProductBySlug(slug);
       setSelectedProduct(response.data);
       setError(null);
     } catch (err) {
@@ -114,7 +106,7 @@ export const useProducts = (
     async (productData: FormData) => {
       setLoading(true);
       try {
-        const response = await createProduct(productData);
+        const response = await productService.createProduct(productData);
         setProducts((prev) => [response.data, ...prev]); // Add new product to the list
         const newTotal = totalItems + 1;
         setTotalItems(newTotal);
@@ -136,7 +128,7 @@ export const useProducts = (
     async (id: number, productData: FormData) => {
       setLoading(true);
       try {
-        const response = await updateProduct(id, productData);
+        const response = await productService.updateProduct(id, productData);
         setProducts((prev) =>
           prev.map((product) => (product.id === id ? response.data : product))
         );
@@ -158,7 +150,7 @@ export const useProducts = (
     async (id: number) => {
       setLoading(true);
       try {
-        await deleteProduct(id);
+        await productService.deleteProduct(id);
         const updatedProducts = products.filter((p) => p.id !== id);
         const newTotal = totalItems - 1;
         setProducts(updatedProducts);
@@ -183,7 +175,7 @@ export const useProducts = (
     async (filters: Record<string, string>) => {
       setLoading(true);
       try {
-        const response = await filterProducts(filters, page - 1, initialPageSize);
+        const response = await productService.filterProducts(filters, page - 1, initialPageSize);
         handleResponsePagination(response);
       } catch (err) {
         handleError(err, 'Failed to filter products');

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { ProductResponse } from "types/product/product-response.types";
-import { Card, CardBody, CardFooter, Badge } from "@nextui-org/react";
+import { Badge } from "@nextui-org/react";
 import FavouriteButton from "../shared/FavouriteButton";
 
 const DEFAULT_IMAGE_URL = "/images/default-image.png";
@@ -47,16 +47,15 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
     );
 
     return (
-        <Card className="group relative h-full w-full overflow-hidden rounded-2xl border bg-white ">
+        <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white transition-transform">
             {/* Sale badge */}
             {salePercentage > 0 && (
                 <div className="absolute top-3 left-3 z-20">
-                    <span className="inline-block rounded-full bg-gradient-to-r from-red-500 to-pink-500 px-3 py-1 text-xs font-bold text-white ">
+                    <span className="inline-block rounded-full bg-gradient-to-r from-red-500 to-pink-500 px-3 py-1 text-xs font-bold text-white">
                         -{salePercentage}%
                     </span>
                 </div>
             )}
-
 
             {/* Favourite button */}
             <div className="absolute top-3 right-3 z-20">
@@ -65,7 +64,7 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
 
             {/* Product image */}
             <Link href={`/products/${slug}`} onClick={handleClick}>
-                <div className="relative aspect-square w-full overflow-hidden rounded-t-2xl">
+                <div className="relative aspect-square w-full overflow-hidden">
                     <Image
                         src={selectedImage}
                         alt={name || "Product image"}
@@ -77,9 +76,10 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
                 </div>
             </Link>
 
-            <CardBody className="p-4 space-y-3">
+            {/* Content */}
+            <div className="flex flex-1 flex-col justify-between p-4 space-y-3">
                 <Link href={`/products/${slug}`} onClick={handleClick}>
-                    <h3 className="line-clamp-2 text-base font-semibold text-gray-900 hover:text-primary">
+                    <h3 className="line-clamp-2 text-xl font-semibold text-gray-900 hover:text-primary">
                         {name}
                     </h3>
                 </Link>
@@ -118,12 +118,13 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
                         ))}
                     </div>
                 )}
-            </CardBody>
+            </div>
 
-            <CardFooter className="p-4 pt-0">
+            {/* Footer */}
+            <div className="px-4 pb-4 pt-0">
                 <div className="flex w-full items-center justify-between">
                     <div className="flex flex-col">
-                        <span className="text-lg font-bold text-red-500">
+                        <span className="text-xl font-bold text-red-500">
                             {salePrice.toLocaleString()}₫
                         </span>
                         {salePercentage > 0 && (
@@ -133,8 +134,8 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
                         )}
                     </div>
                 </div>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     );
 };
 
