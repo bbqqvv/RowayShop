@@ -47,7 +47,7 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
     );
 
     return (
-        <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white transition-transform">
+        <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl hover:bg-gray-50 bg-white transition-transform">
             {/* Sale badge */}
             {salePercentage > 0 && (
                 <div className="absolute top-3 left-3 z-20">
@@ -85,23 +85,19 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
                 </Link>
 
                 {/* Color variants */}
-                {variants.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                        {variants.map(({ color, imageUrl }, index) => (
-                            <button
-                                key={index}
-                                className={`h-6 w-6 rounded-full border-2 transition-all hover:scale-110 ${selectedImage === getImageUrl(imageUrl)
-                                    ? "border-black scale-110"
-                                    : "border-gray-300"
-                                    }`}
-                                style={{ backgroundColor: color.toLowerCase() }}
-                                onClick={() => handleImageChange(imageUrl)}
-                                title={color}
-                                aria-label={`Select ${color} color`}
-                            />
-                        ))}
-                    </div>
-                )}
+                {variants.map(({ color = "#ccc", imageUrl = "" }, index) => (
+                    <button
+                        key={index}
+                        className={`h-6 w-6 rounded-full border-2 transition-all hover:scale-110 ${selectedImage === getImageUrl(imageUrl)
+                            ? "border-black scale-110"
+                            : "border-gray-300"
+                            }`}
+                        style={{ backgroundColor: color?.toLowerCase?.() ?? "#ccc" }}
+                        onClick={() => handleImageChange(imageUrl)}
+                        title={color}
+                        aria-label={`Select ${color} color`}
+                    />
+                ))}
 
                 {/* Tags */}
                 {tags.length > 0 && (

@@ -24,7 +24,7 @@ const Header = () => {
   const cart = useSelector((state: RootState) => state.cart.cart);
   const favourites = useSelector((state: RootState) => state.favourites.favourites);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Thêm state cho menu di động
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { logout } = useAuthContext();
   const { token } = useAuth();
   const [isSticky, setIsSticky] = useState(false);
@@ -35,13 +35,14 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen || isSearchOpen ? "hidden" : "auto";
+  }, [isMenuOpen, isSearchOpen]);
+
   const cartCount = cart?.length || 0;
   const favouriteCount = favourites?.length || 0;
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeAll = () => {
     setIsMenuOpen(false);
     setIsSearchOpen(false);
@@ -74,14 +75,14 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Search - Desktop */}
+            {/* Desktop Search */}
             <div className="hidden md:flex flex-1 justify-center">
               <SearchBar />
             </div>
 
-            {/* Right Section */}
+            {/* Icons */}
             <div className="flex items-center space-x-4">
-              {/* ✅ Mobile Only: Search + Menu */}
+              {/* Mobile: Search + Menu */}
               <div className="flex md:hidden items-center space-x-2">
                 <button
                   onClick={() => setIsSearchOpen(true)}
@@ -101,12 +102,9 @@ const Header = () => {
                 </button>
               </div>
 
-              {/* ✅ Tablet/Desktop Only: Icons */}
+              {/* Desktop Icons */}
               <div className="hidden md:flex items-center space-x-4">
-                <Link
-                  href="/favourites"
-                  className="relative p-2 hover:bg-gray-100 rounded-full"
-                >
+                <Link href="/favourites" className="relative p-2 hover:bg-gray-100 rounded-full">
                   <HeartIcon size={20} className="text-gray-700" />
                   {favouriteCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
@@ -114,10 +112,7 @@ const Header = () => {
                     </span>
                   )}
                 </Link>
-                <Link
-                  href="/cart"
-                  className="relative p-2 hover:bg-gray-100 rounded-full"
-                >
+                <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-full">
                   <ShoppingBagIcon size={20} className="text-gray-700" />
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
@@ -125,10 +120,7 @@ const Header = () => {
                     </span>
                   )}
                 </Link>
-                <Link
-                  href="/account"
-                  className="p-2 hover:bg-gray-100 rounded-full"
-                >
+                <Link href="/account" className="p-2 hover:bg-gray-100 rounded-full">
                   <UserIcon size={20} className="text-gray-700" />
                 </Link>
                 {token && (
@@ -154,15 +146,16 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="fixed inset-0 bg-white z-40 pt-24 px-4">
-          <div className="flex flex-col space-y-6">
-            <Link
-              href="/favourites"
-              onClick={closeAll}
-              className="flex items-center justify-between py-2 border-b"
-            >
+        <div className="fixed inset-0 bg-white z-[60] px-4 pt-6 overflow-y-auto transition-all duration-300">
+          <div className="flex justify-end mb-4">
+            <button onClick={closeAll} className="p-2">
+              <XIcon size={28} className="text-gray-700" />
+            </button>
+          </div>
+          <div className="flex flex-col space-y-6 text-lg font-medium">
+            <Link href="/favourites" onClick={closeAll} className="flex items-center justify-between py-2 border-b">
               <span>Yêu thích</span>
               {favouriteCount > 0 && (
                 <span className="bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
@@ -170,11 +163,7 @@ const Header = () => {
                 </span>
               )}
             </Link>
-            <Link
-              href="/cart"
-              onClick={closeAll}
-              className="flex items-center justify-between py-2 border-b"
-            >
+            <Link href="/cart" onClick={closeAll} className="flex items-center justify-between py-2 border-b">
               <span>Giỏ hàng</span>
               {cartCount > 0 && (
                 <span className="bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
@@ -182,13 +171,7 @@ const Header = () => {
                 </span>
               )}
             </Link>
-            <Link
-              href="/account"
-              onClick={closeAll}
-              className="py-2 border-b"
-            >
-              Tài khoản
-            </Link>
+            <Link href="/account" onClick={closeAll} className="py-2 border-b">Tài khoản</Link>
             {token && (
               <button
                 onClick={async () => {
@@ -211,10 +194,10 @@ const Header = () => {
         </div>
       )}
 
-      {/* Mobile Search Overlay */}
+      {/* Mobile Search */}
       {isSearchOpen && (
-        <div className="fixed inset-0 bg-white z-50 px-4 py-6">
-          <div className="flex items-center gap-4">
+        <div className="fixed inset-0 bg-white z-[60] px-4 py-6 flex flex-col transition-all duration-300">
+          <div className="flex items-center gap-4 mb-4">
             <div className="relative flex-1">
               <SearchIcon
                 size={20}
@@ -223,13 +206,13 @@ const Header = () => {
               <input
                 type="text"
                 placeholder="Tìm kiếm sản phẩm..."
-                className="w-full pl-10 pr-4 py-3 text-lg border-b border-gray-300 focus:border-black outline-none"
+                className="w-full pl-10 pr-4 py-3 text-base border-b border-gray-300 focus:border-black outline-none"
                 autoFocus
               />
             </div>
             <button
               onClick={() => setIsSearchOpen(false)}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2"
             >
               <XIcon size={24} className="text-gray-700" />
             </button>

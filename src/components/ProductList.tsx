@@ -48,31 +48,35 @@ const ProductList = () => {
   }, [page, totalPages, setPage]);
 
   return (
-    <section className="container py-8">
-      {/* Product Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {products.length === 0 ? (
-          Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
-            <ProductSkeleton key={`skeleton-${index}`} />
-          ))
-        ) : (
-          products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              markAsViewed={markAsViewed}
-            />
-          ))
-        )}
-      </div>
+    <>
+      <h2 className="text-xl sm:text-3xl text-center font-semibold mb-6">
+        Sản phẩm của chúng tôi
+      </h2>
+      <section className="w-full p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-screen-xl justify-center items-center mx-auto">
+          {products.length === 0 ? (
+            Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+              <ProductSkeleton key={`skeleton-${index}`} />
+            ))
+          ) : (
+            products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                markAsViewed={markAsViewed}
+              />
+            ))
+          )}
+        </div>
 
-      <LoadMoreButton
-        page={page}
-        totalPages={totalPages}
-        isLoadingMore={isLoadingMore}
-        onLoadMore={handleLoadMore}
-      />
-    </section>
+        <LoadMoreButton
+          page={page}
+          totalPages={totalPages}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={handleLoadMore}
+        />
+      </section>
+    </>
   );
 };
 
