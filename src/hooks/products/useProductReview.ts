@@ -11,10 +11,10 @@ export const useProductReviews = () => {
 
   // 🟢 Lấy danh sách đánh giá của sản phẩm từ API
   const fetchReviewsByProduct = useCallback(
-    async (productId: number, page = 0) => {
+    async (productId: number, page = 0, rating?: number) => {
       setLoading(true);
       try {
-        const response: ApiResponse<PaginatedResponse<ProductReviewResponse>> = await productReviewService.getReviewsByProduct(productId, page);
+        const response: ApiResponse<PaginatedResponse<ProductReviewResponse>> = await productReviewService.getReviewsByProduct(productId, page, 10, rating);
         setReviews(response.data.items);  // Set danh sách đánh giá sản phẩm
         setError(null);
       } catch (err) {

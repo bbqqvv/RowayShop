@@ -50,9 +50,9 @@ export const userService = {
   },
 
   async getUserProfile(token: string): Promise<UserResponse> {
-    const response = await apiClient.get<UserResponse>(`${BASE_URL}/me`, {
+    const response = await apiClient.get<{ success: boolean; message: string; data: UserResponse }>(`${BASE_URL}/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return response.data.data;
   }
 };

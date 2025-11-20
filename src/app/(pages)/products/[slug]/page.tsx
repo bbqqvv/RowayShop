@@ -5,12 +5,13 @@ import { useParams } from "next/navigation";
 import ProductCard from "./components/ProductCard";
 import Breadcrumb from "@/components/shared/Breadcrumb";
 import BackToTopButton from "@/components/shared/BackToTopButton";
-import LoadingScreen from "@/components/shared/LoadingScreen";
+import PageLoader from "@/components/shared/PageLoader";
 import ReviewsProduct from "./components/ReviewsProduct";
 import ProductDescription from "./components/ProductDescription";
 import { useProducts } from "@/hooks/products/useProducts";
 import { useOrders } from "@/hooks/order/useOrder";
 import ViewedProduct from "./components/ViewedProduct";
+import RelatedProducts from "./components/RelatedProducts";
 
 const ProductPage: React.FC = () => {
   const { slug } = useParams();
@@ -50,7 +51,7 @@ const ProductPage: React.FC = () => {
     checkDelivery(); // Call the checkDelivery function
   }, [selectedProduct, activeTab, checkDelivery]); // Ensure checkDelivery is called properly
 
-  if (productLoading) return <LoadingScreen />;
+  if (productLoading) return <PageLoader />;
   if (!selectedProduct) return <div className="text-center text-red-500 mt-10">Không tìm thấy sản phẩm.</div>;
 
   return (
@@ -92,6 +93,7 @@ const ProductPage: React.FC = () => {
         )}
       </div>
 
+      <RelatedProducts categoryName={selectedProduct.categoryName} currentProductId={selectedProduct.id} />
       <ViewedProduct />
       <BackToTopButton />
     </main>

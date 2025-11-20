@@ -3,7 +3,7 @@ import OrderStatus from "../order/components/OrderStatus";
 import OrderList from "../order/components/OrderList";
 import StatusTabs from "../order/components/StatusTabs";
 import { useOrders } from "@/hooks/order/useOrder";
-import LoadingScreen from "@/components/shared/LoadingScreen";
+import PageLoader from "@/components/shared/PageLoader";
 import Image from "next/image";
 export default function OrdersTab() {
   const { orders, loading, error, loadMoreOrders, pagination } = useOrders();
@@ -29,7 +29,7 @@ export default function OrdersTab() {
     [loading, loadMoreOrders]
   );
 
-  if (loading && orders.length === 0) return <LoadingScreen />;
+  if (loading && orders.length === 0) return <PageLoader />;
   if (error) return <p className="text-red-500">Lỗi: {error}</p>;
 
   const validOrders = orders ?? [];
@@ -62,15 +62,15 @@ export default function OrdersTab() {
         </div>
       ) : (
         <p className="text-center text-gray-500 flex justify-center items-center">
-        <Image
-          src="/images/not-found-order1.png" // Đường dẫn đến ảnh default
-          alt="Giỏ hàng trống"
-          width={300}
-          height={300}
-          className="mb-6"
-        />
-      </p>
-      
+          <Image
+            src="/images/not-found-order1.png" // Đường dẫn đến ảnh default
+            alt="Giỏ hàng trống"
+            width={300}
+            height={300}
+            className="mb-6"
+          />
+        </p>
+
       )}
 
       {/* Hiển thị thông tin phân trang */}

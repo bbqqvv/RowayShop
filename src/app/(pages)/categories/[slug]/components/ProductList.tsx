@@ -6,6 +6,7 @@ import ProductCard from "@/app/(pages)/categories/[slug]/components/ProductCard"
 import { ChevronDownIcon, GridIcon, ListIcon } from "lucide-react";
 import Pagination from "@/components/shared/Pagination";
 import { ProductResponse } from "types/product/product-response.types";
+import ProductSkeleton from "@/components/products/ProductSkeleton";
 
 interface ProductListProps {
   slug: string;
@@ -26,10 +27,6 @@ const ProductList: React.FC<ProductListProps> = ({ slug }) => {
     fetchProducts
   } = useProducts(slug);
 
-  const handleAddToCart = (productId: number) => {
-    console.log(`Product with ID: ${productId} added to cart`);
-  };
-
   // When page changes, fetch new products
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -40,12 +37,9 @@ const ProductList: React.FC<ProductListProps> = ({ slug }) => {
     fetchProducts();
   }, [slug, page, fetchProducts]);
 
-  if (loading) return <p>Loading products...</p>;
-  if (error) return <p>{error}</p>;
-
   return (
     <section className="py-10">
-      <div className="text-center mb-10">
+      <div className="mb-10">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <h1 className="text-2xl font-bold mb-4 sm:mb-0">Tất cả sản phẩm</h1>
           <div className="flex items-center space-x-4 w-full sm:w-auto">
@@ -81,6 +75,7 @@ const ProductList: React.FC<ProductListProps> = ({ slug }) => {
           </div>
         </div>
       </div>
+
       {/* Dynamic grid or list view */}
       <div
         className={`mx-auto ${activeView === "grid"
@@ -88,17 +83,34 @@ const ProductList: React.FC<ProductListProps> = ({ slug }) => {
           : "grid grid-cols-1 gap-6"
           }`}
       >
-        {products.map((product: ProductResponse) => (
-          <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-        ))}
+        {loading ? (
+          // Show skeletons while loading
+          Array.from({ length: 8 }).map((_, index) => (
+            <ProductSkeleton key={`skeleton-${index}`} />
+          ))
+        ) : error ? (
+          <div className="col-span-full text-center py-12">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <p className="text-gray-500">Không tìm thấy sản phẩm nào.</p>
+          </div>
+        ) : (
+          products.map((product: ProductResponse) => (
+            <ProductCard key={product.id} product={product} />
+          ))
+        )}
       </div>
 
       {/* Pagination */}
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {!loading && products.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </section>
   );
 };

@@ -34,6 +34,7 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
     const [selectedImage, setSelectedImage] = useState<string>(
         getImageUrl(mainImageUrl)
     );
+    const hoverImage = variants.find(v => v.imageUrl)?.imageUrl || "";
 
     const price = variants[0]?.sizes[0]?.price ?? 0;
     const salePrice =
@@ -47,7 +48,7 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
     );
 
     return (
-        <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl hover:bg-gray-50 bg-white transition-transform">
+        <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-gray-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
             {/* Sale badge */}
             {salePercentage > 0 && (
                 <div className="absolute top-3 left-3 z-20">
@@ -63,7 +64,7 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
             </div>
 
             {/* Product image */}
-            <Link href={`/products/${slug}`} onClick={handleClick}>
+            <Link href={`/products/${slug}`} onClick={handleClick} className="relative block">
                 <div className="relative aspect-square w-full overflow-hidden">
                     <Image
                         src={selectedImage}
@@ -73,13 +74,24 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         priority={id <= 8}
                     />
+                    {hoverImage && (
+                        <Image
+                            src={getImageUrl(hoverImage)}
+                            alt={name || "Product image hover"}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                            className="object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                            priority={false}
+                        />
+                    )}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>
             </Link>
 
             {/* Content */}
             <div className="flex flex-1 flex-col justify-between p-4 space-y-3">
                 <Link href={`/products/${slug}`} onClick={handleClick}>
-                    <h3 className="line-clamp-2 text-xl font-semibold text-gray-900 hover:text-primary">
+                    <h3 className="line-clamp-2 text-base sm:text-lg font-semibold text-gray-900 hover:text-primary">
                         {name}
                     </h3>
                 </Link>
@@ -118,17 +130,25 @@ const ProductCard = ({ product, markAsViewed }: ProductCardProps) => {
 
             {/* Footer */}
             <div className="px-4 pb-4 pt-0">
-                <div className="flex w-full items-center justify-between">
+                <div className="flex w-full items-end justify-between">
                     <div className="flex flex-col">
-                        <span className="text-xl font-bold text-red-500">
-                            {salePrice.toLocaleString()}₫
+                        <span className="text-lg font-bold text-red-500">
+                            {salePrice.toLocaleString("vi-VN")}₫
                         </span>
                         {salePercentage > 0 && (
-                            <span className="text-sm text-gray-400 line-through">
-                                {price.toLocaleString()}₫
+                            <span className="text-xs text-gray-400 line-through">
+                                {price.toLocaleString("vi-VN")}₫
                             </span>
                         )}
                     </div>
+                    <Link
+                        href={`/products/${slug}`}
+                        onClick={handleClick}
+                        className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50"
+                        aria-label="Xem chi tiết sản phẩm"
+                    >
+                        Xem chi tiết
+                    </Link>
                 </div>
             </div>
         </div>

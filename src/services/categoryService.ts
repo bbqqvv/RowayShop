@@ -1,12 +1,18 @@
 import apiClient from "@/apiClient";
 import { CategoryResponse } from "types/category/category-response.type";
+import { mockCategories } from "@/data/mockData";
 
 const BASE_URL = "/api/categories";
 
 const categoryService = {
   async getAllCategories(): Promise<CategoryResponse[]> {
-    const response = await apiClient.get(`${BASE_URL}`);
-    return response.data.data;
+    // const response = await apiClient.get(`${BASE_URL}`);
+    // return response.data.data;
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(mockCategories);
+      }, 500);
+    });
   },
 
   // Tạo mới một danh mục

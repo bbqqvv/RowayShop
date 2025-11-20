@@ -10,7 +10,7 @@ import React, {
 import { setCookie, getCookie, deleteCookie } from "cookies-next";
 import authService, { } from "@/services/authService";
 import { LoginResponse } from "@/hooks/auth/apiTypes";
-import LoadingScreen from "@/components/shared/LoadingScreen";
+import PageLoader from "@/components/shared/PageLoader";
 import { UserResponse } from "types/user/user-creation-response.type";
 import { userService } from "@/services/userService";
 
@@ -60,33 +60,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     initAuth();
   }, []);
 
-  const setAuthData = (data: LoginResponse) => {
+  const setAuthData = async (data: LoginResponse) => {
     setToken(data.token);
     setCookie("token", data.token, {
       maxAge: 3600,
       path: "/",
-      sameSite: "strict",
+      sameSite: "lax",
     });
+    try {
+      const profile = await userService.getUserProfile(data.token);
+      setUser(profile);
+    } catch (e) {
+      console.error("Failed to load user profile after login", e);
+    }
   };
 
   const googleSignIn = async (googleToken: string): Promise<LoginResponse> => {
     const data = await authService.googleLogin(googleToken);
     if (!data?.token) throw new Error("Token not found in response");
-    setAuthData(data);
+    await setAuthData(data);
     return data;
   };
 
   const login = async (username: string, password: string): Promise<LoginResponse> => {
     const data = await authService.loginUser(username, password);
     if (!data?.token) throw new Error("Token not found in response");
-    setAuthData(data);
+    await setAuthData(data);
     return data;
   };
 
   const register = async (username: string, password: string, email: string): Promise<LoginResponse> => {
     const data = await authService.registerUser(username, password, email);
     if (!data?.token) throw new Error("Token not found in response");
-    setAuthData(data);
+    await setAuthData(data);
     return data;
   };
 
@@ -100,7 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <AuthContext.Provider
       value={{ user, token, googleSignIn, login, register, logout, loading, setUser, setToken }}
     >
-      {loading ? <LoadingScreen /> : children}
+      {loading ? <PageLoader /> : children}
     </AuthContext.Provider>
   );
 };
